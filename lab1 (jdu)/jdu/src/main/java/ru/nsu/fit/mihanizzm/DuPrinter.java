@@ -1,5 +1,69 @@
 package ru.nsu.fit.mihanizzm;
 
-public class DuPrinter {
+import java.io.IOException;
 
+public class DuPrinter {
+    final static long KIBIBYTE = 1024;
+    final static long MEBIBYTE = KIBIBYTE * 1024;
+    final static long GIBIBYTE = MEBIBYTE * 1024;
+    final static long TEBIBYTE = GIBIBYTE * 1024;
+
+    private static String convertSize(long size) {
+        if (size < KIBIBYTE) {
+            return String.format("%dB", size);
+        }
+        else if (size < MEBIBYTE) {
+            double tmpSize = (double)size / (KIBIBYTE);
+            return String.format("%.2fKiB", tmpSize);
+        }
+        else if (size < GIBIBYTE) {
+            double tmpSize = (double)size / (MEBIBYTE);
+            return String.format("%.2fMiB", tmpSize);
+        }
+        else if (size < TEBIBYTE) {
+            double tmpSize = (double)size / (GIBIBYTE);
+            return String.format("%.2fGiB", tmpSize);
+        }
+        else {
+            double tmpSize = (double)size / (TEBIBYTE);
+            return String.format("%.2fTiB", tmpSize);
+        }
+    }
+
+    public static String getPrintInfo(DuFile file, CommandLineOptions opts) throws IOException {
+        if (file.getDepth() > opts.depth()) {
+            return "";
+        }
+        StringBuilder resultString = new StringBuilder();
+        resultString.append("\t".repeat(Math.max(0, file.getDepth())));
+
+        if (file instanceof File) {
+            resultString.append(file.getName());
+            resultString.append(" [");
+            resultString.append(convertSize(file.getSize()));
+            resultString.append("]\n");
+        }
+        else if (file instanceof SymLink) {
+            if (opts.isCheckingSymLinks()) {
+                resultString.append(getPrintInfo(((SymLink) file).resolve(), opts));
+            }
+            else {
+                resultString.append(file.getName());
+                resultString.append(" [");
+                resultString.append(convertSize(file.getSize()));
+                resultString.append("] - symlink\n");
+            }
+        }
+        else if (file instanceof Directory) {
+            resultString.append(file.getName());
+            resultString.append(" [");
+            resultString.append(convertSize(file.getSize()));
+            resultString.append("]\n");
+
+            for (DuFile child: Directory.getLimitedChildren((Directory) file, opts.limit())) {
+                resultString.append(getPrintInfo(child, opts));
+            }
+        }
+        return resultString.toString();
+    }
 }

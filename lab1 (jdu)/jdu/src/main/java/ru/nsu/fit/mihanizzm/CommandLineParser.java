@@ -17,6 +17,10 @@ public class CommandLineParser {
         boolean isCheckingSymLinks = IS_NOT_CHECKING_SYMLINKS;
         Path rootFilePath = DEFAULT_ROOT_PATH;
 
+        if (Args.length == 0) {
+            return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
+        }
+
         if (ArgsList.contains("--depth")) {
             int index = ArgsList.indexOf("--depth") + 1;
             int argValue = 0;
