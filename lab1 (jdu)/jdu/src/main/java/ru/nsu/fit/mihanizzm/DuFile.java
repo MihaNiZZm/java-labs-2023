@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public abstract class DuFile {
@@ -80,7 +79,7 @@ public abstract class DuFile {
             size = Files.size(filePath);
         }
         else if (Files.isSymbolicLink(filePath)) {
-            size = SymLink.SYMLINK_SIZE;
+            size = SymLink.SYMLINK_SIZE; // Question. What should I do with size of symbolic links?
         }
         return size;
     }

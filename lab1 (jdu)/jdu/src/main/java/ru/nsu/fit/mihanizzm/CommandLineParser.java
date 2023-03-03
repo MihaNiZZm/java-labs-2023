@@ -11,7 +11,7 @@ public class CommandLineParser {
     static final int DEFAULT_LIMIT = 5;
     static final boolean IS_NOT_CHECKING_SYMLINKS = false;
     static CommandLineOptions getCmdOptions(String[] Args) {
-        List ArgsList = Arrays.asList(Args);
+        List<String> ArgsList = Arrays.asList(Args);
         int depth = DEFAULT_DEPTH;
         int limit = DEFAULT_LIMIT;
         boolean isCheckingSymLinks = IS_NOT_CHECKING_SYMLINKS;
@@ -25,10 +25,10 @@ public class CommandLineParser {
             int index = ArgsList.indexOf("--depth") + 1;
             int argValue = 0;
             try {
-                argValue = Integer.parseInt((String)ArgsList.get(index));
+                argValue = Integer.parseInt(ArgsList.get(index));
             }
             catch (NumberFormatException error) {
-                System.err.println(error.toString());
+                System.err.println(error);
             }
             if (argValue <= 0) {
                 throw new CommandLineArgsException("Invalid value of a depth.");
@@ -40,10 +40,10 @@ public class CommandLineParser {
             int index = ArgsList.indexOf("--limit") + 1;
             int argValue = 0;
             try {
-                argValue = Integer.parseInt((String)ArgsList.get(index));
+                argValue = Integer.parseInt(ArgsList.get(index));
             }
             catch (NumberFormatException error) {
-                System.err.println(error.toString());
+                System.err.println(error);
             }
             if (argValue <= 0) {
                 throw new CommandLineArgsException("Invalid value of a depth.");
@@ -55,8 +55,8 @@ public class CommandLineParser {
             isCheckingSymLinks = true;
         }
 
-        if (Files.exists(Path.of((String)ArgsList.get(ArgsList.size() - 1)))) {
-            rootFilePath = Path.of((String)ArgsList.get(ArgsList.size() - 1));
+        if (Files.exists(Path.of(ArgsList.get(ArgsList.size() - 1)))) {
+            rootFilePath = Path.of(ArgsList.get(ArgsList.size() - 1));
         }
 
         return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
