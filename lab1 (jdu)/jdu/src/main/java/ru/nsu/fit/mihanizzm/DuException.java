@@ -11,3 +11,9 @@ class CommandLineArgsException extends DuException {
         super(msg);
     }
 }
+
+class FileAnalysisException extends  DuException {
+    public FileAnalysisException(String msg) {
+        super(msg);
+    }
+}

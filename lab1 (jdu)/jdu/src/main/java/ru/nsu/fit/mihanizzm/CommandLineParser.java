@@ -28,7 +28,7 @@ public class CommandLineParser {
                 argValue = Integer.parseInt(ArgsList.get(index));
             }
             catch (NumberFormatException error) {
-                System.err.println(error);
+                System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
             }
             if (argValue <= 0) {
                 throw new CommandLineArgsException("Invalid value of a depth.");
@@ -43,7 +43,7 @@ public class CommandLineParser {
                 argValue = Integer.parseInt(ArgsList.get(index));
             }
             catch (NumberFormatException error) {
-                System.err.println(error);
+                System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
             }
             if (argValue <= 0) {
                 throw new CommandLineArgsException("Invalid value of a depth.");

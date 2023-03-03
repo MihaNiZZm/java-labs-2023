@@ -48,9 +48,14 @@ public abstract class DuFile {
 
 
 
-    protected DuFile(Path path, int depth, boolean isCheckingSymLinks) throws IOException {
+    protected DuFile(Path path, int depth, boolean isCheckingSymLinks) {
         this.path = path;
-        this.size = getSizeOfFile(path);
+        try {
+            this.size = getSizeOfFile(path);
+        }
+        catch (IOException error) {
+            this.size = 0;
+        }
         this.name = getNameOfFile(path);
         this.depth = depth;
         this.isCheckingSymLinks = isCheckingSymLinks;
@@ -81,13 +86,17 @@ public abstract class DuFile {
         else if (Files.isSymbolicLink(filePath)) {
             size = SymLink.SYMLINK_SIZE; // Question. What should I do with size of symbolic links?
         }
+        else {
+            String errorMessage = "Cannot get size of file: \"" + filePath + "\"\n";
+            throw new FileAnalysisException(errorMessage);
+        }
         return size;
     }
 }
 
 class File extends DuFile {
 
-    public File(Path path, int depth, boolean isCheckingSymLinks) throws IOException {
+    public File(Path path, int depth, boolean isCheckingSymLinks) {
         super(path, depth, isCheckingSymLinks);
     }
 }
@@ -119,11 +128,11 @@ class Directory extends DuFile {
     private List<DuFile> createChildren(int depth, boolean isCheckingSymLinks) throws IOException {
         children = new ArrayList<>();
         for (Path child: Files.list(path).toList()) {
-            if (Files.isDirectory(child)) {
+            if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
                 Directory childDirectory = new Directory(child, depth + 1, isCheckingSymLinks);
                 children.add(childDirectory);
             }
-            if (Files.isRegularFile(child)) {
+            if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
                 File childFile = new File(child, depth + 1, isCheckingSymLinks);
                 children.add(childFile);
             }
