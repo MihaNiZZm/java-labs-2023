@@ -2,6 +2,7 @@ package ru.nsu.fit.mihanizzm;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,19 +62,25 @@ public abstract class DuFile {
     }
     private static long getSizeOfFile(Path filePath) throws IOException {
         long size = 0;
-        if (Files.isDirectory(filePath)) {
+        if (Files.isDirectory(filePath, LinkOption.NOFOLLOW_LINKS)) {
             List<Path> folderFiles = Files.list(filePath).toList();
             for (Path file: folderFiles) {
-                if (Files.isDirectory(file)) {
+                if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
                     size += getSizeOfFile(file);
                 }
-                else if (Files.isRegularFile(file)) {
+                else if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
                     size += Files.size(file);
                 }
                 else if (Files.isSymbolicLink(file)) {
                     size += Files.size(file);
                 }
             }
+        }
+        else if (Files.isRegularFile(filePath, LinkOption.NOFOLLOW_LINKS)) {
+            size = Files.size(filePath);
+        }
+        else if (Files.isSymbolicLink(filePath)) {
+            size = SymLink.SYMLINK_SIZE;
         }
         return size;
     }
@@ -123,16 +130,7 @@ class Directory extends DuFile {
             }
             if (Files.isSymbolicLink(child)) {
                 SymLink childSymLink = new SymLink(child, depth + 1, isCheckingSymLinks);
-                if (isCheckingSymLinks) {
-                    DuFile resolvedLink = childSymLink.resolve();
-                    while (resolvedLink instanceof SymLink) {
-                        resolvedLink = ((SymLink) resolvedLink).resolve();
-                    }
-                    children.add(resolvedLink);
-                }
-                else {
-                    children.add(childSymLink);
-                }
+                children.add(childSymLink);
             }
         }
         return children;
@@ -141,21 +139,24 @@ class Directory extends DuFile {
 
 class SymLink extends DuFile {
     final private Path realPath;
+    static final int SYMLINK_SIZE = 0;
 
     public SymLink(Path path, int depth, boolean isCheckingSymLinks) throws IOException {
         super(path, depth, isCheckingSymLinks);
+        size = SYMLINK_SIZE;
         realPath = path.toRealPath();
     }
 
     public DuFile resolve() throws IOException {
-        if (Files.isDirectory(realPath)) {
-            return new Directory(realPath, depth - 1, isCheckingSymLinks);
+        if (Files.isDirectory(realPath, LinkOption.NOFOLLOW_LINKS)) {
+            return new Directory(realPath, depth, isCheckingSymLinks);
         }
-        if (Files.isRegularFile(realPath)) {
-            return new File(realPath, depth - 1, isCheckingSymLinks);
+        if (Files.isRegularFile(realPath, LinkOption.NOFOLLOW_LINKS)) {
+            return new File(realPath, depth, isCheckingSymLinks);
         }
         if (Files.isSymbolicLink(realPath)) {
-            return new SymLink(realPath, depth, isCheckingSymLinks);
+            SymLink nestedLink = new SymLink(realPath, depth, isCheckingSymLinks);
+            return nestedLink.resolve();
         }
         return null;
     }

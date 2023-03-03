@@ -1,6 +1,8 @@
 package ru.nsu.fit.mihanizzm;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DuPrinter {
     final static long KIBIBYTE = 1024;
@@ -30,10 +32,12 @@ public class DuPrinter {
         }
     }
 
-    public static String getPrintInfo(DuFile file, CommandLineOptions opts) throws IOException {
-        if (file.getDepth() > opts.depth()) {
+    public static String getPrintInfo(DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) throws IOException {
+        if (file.getDepth() > opts.depth() || visited.contains(file)) {
             return "";
         }
+        visited.add(file);
+
         StringBuilder resultString = new StringBuilder();
         resultString.append("\t".repeat(Math.max(0, file.getDepth())));
 
@@ -44,14 +48,15 @@ public class DuPrinter {
             resultString.append("]\n");
         }
         else if (file instanceof SymLink) {
+            resultString.append("SymLink: ");
             if (opts.isCheckingSymLinks()) {
-                resultString.append(getPrintInfo(((SymLink) file).resolve(), opts));
+                resultString.append(getPrintInfo(((SymLink) file).resolve(), opts, visited));
             }
             else {
                 resultString.append(file.getName());
                 resultString.append(" [");
                 resultString.append(convertSize(file.getSize()));
-                resultString.append("] - symlink\n");
+                resultString.append("]\n");
             }
         }
         else if (file instanceof Directory) {
@@ -61,7 +66,7 @@ public class DuPrinter {
             resultString.append("]\n");
 
             for (DuFile child: Directory.getLimitedChildren((Directory) file, opts.limit())) {
-                resultString.append(getPrintInfo(child, opts));
+                resultString.append(getPrintInfo(child, opts, visited));
             }
         }
         return resultString.toString();
