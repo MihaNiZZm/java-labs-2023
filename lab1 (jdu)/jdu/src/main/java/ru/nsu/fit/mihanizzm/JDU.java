@@ -9,7 +9,6 @@ public class JDU {
     private static DuFile buildFileTree(CommandLineOptions options) throws IOException {
         DuFile root = null;
 
-
         if (Files.isDirectory(options.rootPath())) {
             root = new Directory(options.rootPath(), ZERO_DEPTH, options.isCheckingSymLinks());
         }

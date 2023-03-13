@@ -12,7 +12,7 @@ public abstract class DuFile {
     protected long size;
     protected String name;
     protected int depth;
-    protected boolean isCheckingSymLinks; // Question. May it be static for DuFile class?
+    protected boolean isCheckingSymLinks; // Question. May it be static for DuFile class? //ccr: why not? :)
 
     public long getSize() {
         return this.size;
@@ -105,6 +105,7 @@ class Directory extends DuFile {
     private List<DuFile> children;
 
     static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
+        // ccr: what means rawChildren? rename this var ))
         List<DuFile> rawChildren = dir.getChildren();
         rawChildren.sort((o1, o2) -> (int)(o2.getSize() - o1.getSize()));
 

@@ -38,6 +38,8 @@ public class CommandLineParser {
 
         if (ArgsList.contains("--limit")) {
             int index = ArgsList.indexOf("--limit") + 1;
+
+            // ccr: copypaste, mb make it in method?
             int argValue = 0;
             try {
                 argValue = Integer.parseInt(ArgsList.get(index));
@@ -48,6 +50,7 @@ public class CommandLineParser {
             if (argValue <= 0) {
                 throw new CommandLineArgsException("Invalid value of a depth.");
             }
+
             limit = argValue;
         }
 
