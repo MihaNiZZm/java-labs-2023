@@ -10,8 +10,22 @@ public class CommandLineParser {
     static final int DEFAULT_DEPTH = 3;
     static final int DEFAULT_LIMIT = 5;
     static final boolean IS_NOT_CHECKING_SYMLINKS = false;
-    static CommandLineOptions getCmdOptions(String[] Args) {
-        List<String> ArgsList = Arrays.asList(Args);
+
+    static private int getArgValue(int index, List<String> argsList) throws CommandLineArgsException {
+        int argValue = 0;
+        try {
+            argValue = Integer.parseInt(argsList.get(index));
+        }
+        catch (NumberFormatException error) {
+            System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
+        }
+        if (argValue <= 0) {
+            throw new CommandLineArgsException("Invalid value of a depth.");
+        }
+        return argValue;
+    }
+    static CommandLineOptions getCmdOptions(String[] Args) throws CommandLineArgsException {
+        List<String> argsList = Arrays.asList(Args);
         int depth = DEFAULT_DEPTH;
         int limit = DEFAULT_LIMIT;
         boolean isCheckingSymLinks = IS_NOT_CHECKING_SYMLINKS;
@@ -21,45 +35,22 @@ public class CommandLineParser {
             return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
         }
 
-        if (ArgsList.contains("--depth")) {
-            int index = ArgsList.indexOf("--depth") + 1;
-            int argValue = 0;
-            try {
-                argValue = Integer.parseInt(ArgsList.get(index));
-            }
-            catch (NumberFormatException error) {
-                System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
-            }
-            if (argValue <= 0) {
-                throw new CommandLineArgsException("Invalid value of a depth.");
-            }
-            depth = argValue;
+        if (argsList.contains("--depth")) {
+            int index = argsList.indexOf("--depth") + 1;
+            depth = CommandLineParser.getArgValue(index, argsList);
         }
 
-        if (ArgsList.contains("--limit")) {
-            int index = ArgsList.indexOf("--limit") + 1;
-
-            // ccr: copypaste, mb make it in method?
-            int argValue = 0;
-            try {
-                argValue = Integer.parseInt(ArgsList.get(index));
-            }
-            catch (NumberFormatException error) {
-                System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
-            }
-            if (argValue <= 0) {
-                throw new CommandLineArgsException("Invalid value of a depth.");
-            }
-
-            limit = argValue;
+        if (argsList.contains("--limit")) {
+            int index = argsList.indexOf("--limit") + 1;
+            limit = CommandLineParser.getArgValue(index, argsList);
         }
 
-        if (ArgsList.contains("-L")) {
+        if (argsList.contains("-L")) {
             isCheckingSymLinks = true;
         }
 
-        if (Files.exists(Path.of(ArgsList.get(ArgsList.size() - 1)))) {
-            rootFilePath = Path.of(ArgsList.get(ArgsList.size() - 1));
+        if (Files.exists(Path.of(argsList.get(argsList.size() - 1)))) {
+            rootFilePath = Path.of(argsList.get(argsList.size() - 1));
         }
 
         return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);

@@ -9,7 +9,8 @@ public class DuPrinter {
     final static long GIBIBYTE = MEBIBYTE * 1024;
     final static long TEBIBYTE = GIBIBYTE * 1024;
 
-    //ccr: mb make it using swich case?
+    // ccr: mb make it using swich case?
+    // author comment: switch doesn't work with variables with type of long.
     private static String convertSize(long size) {
         if (size < KIBIBYTE) {
             return String.format("%dB", size);
@@ -42,12 +43,7 @@ public class DuPrinter {
         resultString.append("\t".repeat(Math.max(0, file.getDepth())));
 
         if (file instanceof File) {
-            //ccr: mb make this block of code in one line:
-            //ccr: resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
-            resultString.append(file.getName());
-            resultString.append(" [");
-            resultString.append(convertSize(file.getSize()));
-            resultString.append("]\n");
+            resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
          }
         else if (file instanceof SymLink) {
             resultString.append("SymLink: ");
@@ -55,18 +51,11 @@ public class DuPrinter {
                 resultString.append(getPrintInfo(((SymLink) file).resolve(), opts, visited));
             }
             else {
-                resultString.append(file.getName());
-                resultString.append(" [");
-                resultString.append(convertSize(file.getSize()));
-                resultString.append("]\n");
                 resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
             }
         }
         else if (file instanceof Directory) {
-            resultString.append(file.getName());
-            resultString.append(" [");
-            resultString.append(convertSize(file.getSize()));
-            resultString.append("]\n");
+            resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
 
             for (DuFile child: Directory.getLimitedChildren((Directory) file, opts.limit())) {
                 resultString.append(getPrintInfo(child, opts, visited));

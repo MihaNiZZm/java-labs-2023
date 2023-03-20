@@ -105,16 +105,15 @@ class Directory extends DuFile {
     private List<DuFile> children;
 
     static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
-        // ccr: what means rawChildren? rename this var ))
-        List<DuFile> rawChildren = dir.getChildren();
-        rawChildren.sort((o1, o2) -> (int)(o2.getSize() - o1.getSize()));
+        List<DuFile> unsortedChildren = dir.getChildren();
+        unsortedChildren.sort((o1, o2) -> (int)(o2.getSize() - o1.getSize()));
 
         List<DuFile> sortedChildren = new ArrayList<>();
         for (int i = 0; i < limit; ++i) {
-            if (i >= rawChildren.size()) {
+            if (i >= unsortedChildren.size()) {
                 break;
             }
-            sortedChildren.add(rawChildren.get(i));
+            sortedChildren.add(unsortedChildren.get(i));
         }
         return sortedChildren;
     }
