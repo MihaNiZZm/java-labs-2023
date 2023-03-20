@@ -6,6 +6,8 @@ import java.util.HashSet;
 
 public class JDU {
     static final int ZERO_DEPTH = 0;
+
+    // CR: move to separate class TreeBuilder
     private static DuFile buildFileTree(CommandLineOptions options) throws IOException {
         DuFile root = null;
 
@@ -13,7 +15,7 @@ public class JDU {
             root = new Directory(options.rootPath(), ZERO_DEPTH, options.isCheckingSymLinks());
         }
         else if (Files.isRegularFile(options.rootPath())) {
-            root = new File(options.rootPath(), ZERO_DEPTH, options.isCheckingSymLinks());
+            root = new RegularFile(options.rootPath(), ZERO_DEPTH, options.isCheckingSymLinks());
         }
         else if (Files.isSymbolicLink(options.rootPath())) {
             root = new SymLink(options.rootPath(), ZERO_DEPTH, options.isCheckingSymLinks());
@@ -25,11 +27,16 @@ public class JDU {
 
         return root;
     }
+
+    // CommandLineParser
+    // DuTreeBuilder
+    // DuPrinter
     public static void main(String[] args) {
         try {
             HashSet<DuFile> visitedFiles = new HashSet<>();
             CommandLineOptions opts = CommandLineParser.getCmdOptions(args);
             DuFile root = buildFileTree(opts);
+            // CR: pass print stream
             System.out.println(DuPrinter.getPrintInfo(root, opts, visitedFiles));
         }
         catch (IOException exception) {
@@ -37,6 +44,7 @@ public class JDU {
         }
         catch (DuException exception) {
             System.err.println("DuException Error occurred! Error message: \"" + exception.getMessage() + "\"\n");
+            // CR: show usage on parse argument exception
         }
     }
 }

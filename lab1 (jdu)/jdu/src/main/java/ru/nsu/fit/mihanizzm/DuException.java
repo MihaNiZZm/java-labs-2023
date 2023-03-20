@@ -12,7 +12,7 @@ class CommandLineArgsException extends DuException {
     }
 }
 
-class FileAnalysisException extends  DuException {
+class FileAnalysisException extends DuException {
     public FileAnalysisException(String msg) {
         super(msg);
     }

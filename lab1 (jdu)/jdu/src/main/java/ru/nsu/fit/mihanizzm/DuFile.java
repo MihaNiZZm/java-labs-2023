@@ -7,11 +7,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class DuFile {
+// CR: sealed class
+public abstract sealed class DuFile {
     protected Path path;
     protected long size;
     protected String name;
-    protected int depth;
+    protected final int depth;
     protected boolean isCheckingSymLinks; // Question. May it be static for DuFile class? //ccr: why not? :)
 
     public long getSize() {
@@ -50,10 +51,16 @@ public abstract class DuFile {
 
     protected DuFile(Path path, int depth, boolean isCheckingSymLinks) {
         this.path = path;
+        // CR: do it before constructor
         try {
             this.size = getSizeOfFile(path);
         }
+        // foo 10GB
+        //   bar 10GB
+        //   f [unknown]
+        // Couldn't access 'f' file: cause
         catch (IOException error) {
+            // CR: log problem and show to user
             this.size = 0;
         }
         this.name = getNameOfFile(path);
@@ -64,6 +71,8 @@ public abstract class DuFile {
     private static String getNameOfFile(Path filePath) {
         return filePath.getFileName().toString();
     }
+
+    // CR: move tree building to separate class TreeBuilder
     private static long getSizeOfFile(Path filePath) throws IOException {
         long size = 0;
         if (Files.isDirectory(filePath, LinkOption.NOFOLLOW_LINKS)) {
@@ -94,29 +103,16 @@ public abstract class DuFile {
     }
 }
 
-class File extends DuFile {
+final class RegularFile extends DuFile {
 
-    public File(Path path, int depth, boolean isCheckingSymLinks) {
+    public RegularFile(Path path, int depth, boolean isCheckingSymLinks) {
         super(path, depth, isCheckingSymLinks);
     }
 }
 
-class Directory extends DuFile {
+final class Directory extends DuFile {
     private List<DuFile> children;
 
-    static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
-        List<DuFile> unsortedChildren = dir.getChildren();
-        unsortedChildren.sort((o1, o2) -> (int)(o2.getSize() - o1.getSize()));
-
-        List<DuFile> sortedChildren = new ArrayList<>();
-        for (int i = 0; i < limit; ++i) {
-            if (i >= unsortedChildren.size()) {
-                break;
-            }
-            sortedChildren.add(unsortedChildren.get(i));
-        }
-        return sortedChildren;
-    }
     public List<DuFile> getChildren() {
         return children;
     }
@@ -125,6 +121,7 @@ class Directory extends DuFile {
         children = createChildren(depth, isCheckingSymLinks);
     }
 
+    // CR: move tree building to separate class TreeBuilde
     private List<DuFile> createChildren(int depth, boolean isCheckingSymLinks) throws IOException {
         children = new ArrayList<>();
         for (Path child: Files.list(path).toList()) {
@@ -133,19 +130,20 @@ class Directory extends DuFile {
                 children.add(childDirectory);
             }
             if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
-                File childFile = new File(child, depth + 1, isCheckingSymLinks);
-                children.add(childFile);
+                RegularFile childRegularFile = new RegularFile(child, depth + 1, isCheckingSymLinks);
+                children.add(childRegularFile);
             }
             if (Files.isSymbolicLink(child)) {
                 SymLink childSymLink = new SymLink(child, depth + 1, isCheckingSymLinks);
                 children.add(childSymLink);
             }
+            // CR: exception for unknown type
         }
         return children;
     }
 }
 
-class SymLink extends DuFile {
+final class SymLink extends DuFile {
     final private Path realPath;
     static final int SYMLINK_SIZE = 0;
 
@@ -160,7 +158,7 @@ class SymLink extends DuFile {
             return new Directory(realPath, depth, isCheckingSymLinks);
         }
         if (Files.isRegularFile(realPath, LinkOption.NOFOLLOW_LINKS)) {
-            return new File(realPath, depth, isCheckingSymLinks);
+            return new RegularFile(realPath, depth, isCheckingSymLinks);
         }
         if (Files.isSymbolicLink(realPath)) {
             SymLink nestedLink = new SymLink(realPath, depth, isCheckingSymLinks);

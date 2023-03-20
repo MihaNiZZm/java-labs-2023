@@ -17,6 +17,7 @@ public class CommandLineParser {
             argValue = Integer.parseInt(argsList.get(index));
         }
         catch (NumberFormatException error) {
+            // CR: wrap in CommandLineArgsException and throw
             System.err.println("NumberFormatException: \"" + error.getMessage() + "\"\n");
         }
         if (argValue <= 0) {
@@ -24,16 +25,19 @@ public class CommandLineParser {
         }
         return argValue;
     }
-    static CommandLineOptions getCmdOptions(String[] Args) throws CommandLineArgsException {
-        List<String> argsList = Arrays.asList(Args);
+
+    static CommandLineOptions getCmdOptions(String[] args) throws CommandLineArgsException {
+        List<String> argsList = Arrays.asList(args);
         int depth = DEFAULT_DEPTH;
         int limit = DEFAULT_LIMIT;
         boolean isCheckingSymLinks = IS_NOT_CHECKING_SYMLINKS;
         Path rootFilePath = DEFAULT_ROOT_PATH;
 
-        if (Args.length == 0) {
+        if (args.length == 0) {
             return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
         }
+
+        // CR: traversal order
 
         if (argsList.contains("--depth")) {
             int index = argsList.indexOf("--depth") + 1;
@@ -49,6 +53,9 @@ public class CommandLineParser {
             isCheckingSymLinks = true;
         }
 
+        // CR: unknown option?
+
+        // CR: throw exception if not exists
         if (Files.exists(Path.of(argsList.get(argsList.size() - 1)))) {
             rootFilePath = Path.of(argsList.get(argsList.size() - 1));
         }

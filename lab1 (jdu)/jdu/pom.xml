@@ -4,6 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+<!--   CR: package .jdu-->
     <groupId>ru.nsu.fit.mihanizzm</groupId>
     <artifactId>jdu</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -18,7 +19,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
