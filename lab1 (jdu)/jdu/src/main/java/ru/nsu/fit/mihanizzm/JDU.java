@@ -43,7 +43,7 @@ public class JDU {
             System.err.println("IOException Error occurred! Error message: \"" + exception.getMessage() + "\"\n");
         }
         catch (DuException exception) {
-            System.err.println("DuException Error occurred! Error message: \"" + exception.getMessage() + "\"\n");
+            System.err.println(exception.getMessage());
             // CR: show usage on parse argument exception
         }
     }
