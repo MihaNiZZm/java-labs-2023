@@ -130,7 +130,7 @@ public class DuTreeBuilder {
     static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
         List<DuFile> unsortedChildren = dir.getChildren();
         unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
-        return unsortedChildren.subList(0, Math.max(0, Math.min(limit - 1, unsortedChildren.size() - 1)));
+        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
     }
 
     public static DuFile resolveSymLink(SymLink symlink) {

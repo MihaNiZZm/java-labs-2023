@@ -76,12 +76,13 @@ public class DuPrinter {
                 }
                 resultString.append("\n");
             }
-            case SymLink ignored -> {
-                resultString.append("Symlink: ").append(file.getName()).append(" [").append(stringSize).append("]");
-                if (stringSize.equals("unknown")) {
-                    resultString.append(" (file couldn't be accessed or has unknown size.)");
+            case SymLink symLink -> {
+                if (opts.isCheckingSymLinks()) {
+                    resultString.append("Followed symlink: ").append(getPrintInfo(DuTreeBuilder.resolveSymLink(symLink), opts, visited));
                 }
-                resultString.append("\n");
+                else {
+                    resultString.append("Unfollowed symlink: ").append(symLink.getName()).append(" [").append(convertSize(symLink.getSize())).append("]\n");
+                }
             }
             case Directory directory -> {
                 List<DuFile> childrenList = DuTreeBuilder.createChildren(directory);
