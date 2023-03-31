@@ -8,6 +8,18 @@ public class DuException extends RuntimeException {
     }
 }
 
+class DuTreeBuilderException extends DuException {
+    public DuTreeBuilderException(String msg) {
+        super(msg);
+    }
+}
+
+class TreeBuilderFileTypeException extends DuTreeBuilderException {
+    public TreeBuilderFileTypeException(String msg) {
+        super(msg);
+    }
+}
+
 class CommandLineException extends DuException {
     public CommandLineException(String msg) {
         super(msg);
@@ -56,14 +68,32 @@ class FileException extends DuException {
     }
 }
 
-class FileAnalysisException extends FileException {
-    public FileAnalysisException(String msg) {
+class UnknownRealPathException extends FileException {
+    public UnknownRealPathException(String msg) {
+        super(msg);
+    }
+}
+
+class UnknownSizeOfFileException extends FileException {
+    public UnknownSizeOfFileException(String msg) {
+        super(msg);
+    }
+}
+
+class FileGettingListException extends FileException {
+    public FileGettingListException(String msg) {
         super(msg);
     }
 }
 
 class UnknownFileException extends FileException {
     public UnknownFileException(String msg) {
+        super(msg);
+    }
+}
+
+class UnknownFileTypeException extends FileException {
+    public UnknownFileTypeException(String msg) {
         super(msg);
     }
 }

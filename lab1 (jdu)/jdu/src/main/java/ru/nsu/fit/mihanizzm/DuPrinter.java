@@ -1,16 +1,14 @@
 package ru.nsu.fit.mihanizzm;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.List;
 
 public class DuPrinter {
-    // CR: check private and final everywhere
-    final static long KIBIBYTE = 1024;
-    final static long MEBIBYTE = KIBIBYTE * 1024;
-    final static long GIBIBYTE = MEBIBYTE * 1024;
-    final static long TEBIBYTE = GIBIBYTE * 1024;
+    final private static long KIBIBYTE = 1024;
+    final private static long MEBIBYTE = KIBIBYTE * 1024;
+    final private static long GIBIBYTE = MEBIBYTE * 1024;
+    final private static long TEBIBYTE = GIBIBYTE * 1024;
 
 //    enum Size {
 //        KB("KiB", 1024),
@@ -36,9 +34,6 @@ public class DuPrinter {
 //            return null;
 //        }
 //    }
-
-    // ccr: mb make it using switch case?
-    // author comment: switch doesn't work with variables with type of long.
     private static String convertSize(long size) {
         if (size < KIBIBYTE) {
             return String.format("%dB", size);
@@ -64,51 +59,45 @@ public class DuPrinter {
     // foo
     //   symlink
 
-    public static String getPrintInfo(DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) throws IOException {
-        // CR: contains & add -> add
-        if (file.getDepth() > opts.depth() || visited.contains(file)) {
+    private static String getPrintInfo(DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) {
+        if (file.getDepth() > opts.depth() || !visited.add(file)) {
             return "";
         }
-        visited.add(file);
 
         StringBuilder resultString = new StringBuilder();
-        resultString.append("\t".repeat(Math.max(0, file.getDepth())));
+        String stringSize = file.getHasUnknownSize() ? "unknown" : convertSize(file.getSize());
+        resultString.append("\t".repeat(file.getDepth()));
 
-        // CR: switch expression
-        if (file instanceof RegularFile) {
-            // CR: depth field in printer
-            resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
-         }
-        else if (file instanceof SymLink) {
-            resultString.append("SymLink: ");
-            if (opts.isCheckingSymLinks()) {
-                resultString.append(getPrintInfo(((SymLink) file).resolve(), opts, visited));
+        switch (file) {
+            case RegularFile ignored -> {
+                resultString.append(file.getName()).append(" [").append(stringSize).append("]");
+                if (stringSize.equals("unknown")) {
+                    resultString.append(" (file couldn't be accessed or has unknown size.)");
+                }
+                resultString.append("\n");
             }
-            else {
-                resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
+            case SymLink ignored -> {
+                resultString.append("Symlink: ").append(file.getName()).append(" [").append(stringSize).append("]");
+                if (stringSize.equals("unknown")) {
+                    resultString.append(" (file couldn't be accessed or has unknown size.)");
+                }
+                resultString.append("\n");
             }
-        }
-        else if (file instanceof Directory) {
-            resultString.append(file.getName()).append(" [").append(convertSize(file.getSize())).append("]\n");
+            case Directory directory -> {
+                List<DuFile> childrenList = DuTreeBuilder.createChildren(directory);
+                directory.setChildren(childrenList);
 
-            for (DuFile child: getLimitedChildren((Directory) file, opts.limit())) {
-                resultString.append(getPrintInfo(child, opts, visited));
+                resultString.append(directory.getName()).append(" [").append(convertSize(directory.getSize())).append("]\n");
+
+                for (DuFile child: DuTreeBuilder.getLimitedChildren(directory, opts.limit())) {
+                    resultString.append(getPrintInfo(child, opts, visited));
+                }
             }
         }
         return resultString.toString();
     }
 
-    static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
-        List<DuFile> unsortedChildren = dir.getChildren();
-        unsortedChildren.sort((o1, o2) -> (int)(o2.getSize() - o1.getSize()));
-        // CR :unsortedChildren.subList
-        List<DuFile> nChildren = new ArrayList<>();
-        for (int i = 0; i < limit; ++i) {
-            if (i >= unsortedChildren.size()) {
-                break;
-            }
-            nChildren.add(unsortedChildren.get(i));
-        }
-        return nChildren;
+    public static void printInfoInStream(PrintStream printStream, DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) {
+        printStream.append(getPrintInfo(file, opts, visited));
     }
 }

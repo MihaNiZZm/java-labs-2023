@@ -2,8 +2,6 @@ package ru.nsu.fit.mihanizzm;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
 public class CommandLineParser {
     static final private Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));
@@ -12,7 +10,7 @@ public class CommandLineParser {
     static final private boolean IS_NOT_CHECKING_SYMLINKS = false;
 
     static private int getArgValue(int index, String[] args) throws CommandLineException {
-        int argValue = 0;
+        int argValue;
         if (index + 1 == args.length) {
             throw new NoArgumentValueException("The option \"" + args[index] + "\" is the last argument but this option requires an integer value after it.");
         }
@@ -61,8 +59,5 @@ public class CommandLineParser {
             }
         }
         return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
-        // CR: traversal order
-        // CR: unknown option?
-        // CR: throw exception if not exists
     }
 }
