@@ -1,6 +1,4 @@
-package ru.nsu.fit.mihanizzm;
-
-import java.io.File;
+package ru.nsu.fit.mihanizzm.jdu;
 
 public class DuException extends RuntimeException {
     public DuException(String msg) {

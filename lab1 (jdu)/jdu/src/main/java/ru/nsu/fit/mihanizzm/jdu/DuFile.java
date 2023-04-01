@@ -1,10 +1,9 @@
-package ru.nsu.fit.mihanizzm;
+package ru.nsu.fit.mihanizzm.jdu;
 
 import java.nio.file.Path;
 import java.util.List;
 
-// CR: sealed class
-public abstract sealed class DuFile {
+public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
     private final Path path;
     private final long size;
     private final String name;
@@ -30,7 +29,7 @@ public abstract sealed class DuFile {
 
     public boolean getHasUnknownSize() { return this.hasUnknownSize; }
 
-    public void setHasUnknownSize(boolean res) { this.hasUnknownSize = res; }
+    void setHasUnknownSize(boolean res) { this.hasUnknownSize = res; }
 
     @Override
     public int hashCode() {
@@ -65,34 +64,3 @@ public abstract sealed class DuFile {
     }
 }
 
-final class RegularFile extends DuFile {
-    public RegularFile(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
-        super(path, size, name, depth, isCheckingSymLinks);
-    }
-}
-
-final class Directory extends DuFile {
-    private List<DuFile> children;
-
-    public List<DuFile> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<DuFile> childrenList) { this.children = childrenList; }
-
-    public Directory(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
-        super(path, size, name, depth, isCheckingSymLinks);
-    }
-}
-
-final class SymLink extends DuFile {
-    private Path realPath;
-
-    public Path getRealPath() { return this.realPath; }
-
-    public void setRealPath(Path realPath) { this.realPath = realPath; }
-
-    public SymLink(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
-        super(path, size, name, depth, isCheckingSymLinks);
-    }
-}

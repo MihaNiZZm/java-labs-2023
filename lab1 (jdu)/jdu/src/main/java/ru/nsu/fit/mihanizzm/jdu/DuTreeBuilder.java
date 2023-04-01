@@ -1,4 +1,4 @@
-package ru.nsu.fit.mihanizzm;
+package ru.nsu.fit.mihanizzm.jdu;
 
 import java.io.IOException;
 import java.nio.file.Files;
