@@ -13,7 +13,7 @@ public class DuTreeBuilderTest extends DuTest {
     @Test
     public void testOneFileInDirectory() throws IOException {
         FileSystem fs = fileSystem();
-        Path fooPath = fs.getPath("/foo");
+        Path fooPath = fs.getPath("foo");
         Files.createDirectory(fooPath);
         Path barPath = fooPath.resolve("bar.txt");
         Files.createFile(barPath);
