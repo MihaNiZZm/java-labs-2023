@@ -10,6 +10,25 @@ public class GameField {
     private Integer score;
     private FieldListener listener;
 
+    public Integer[][] getGameField() {
+        return gameField;
+    }
+
+    public void clear() {
+        for (int i = 0; i < gameField.length; ++i) {
+            for (int j = 0; j < gameField.length; ++j) {
+                gameField[i][j] = 0;
+            }
+        }
+        this.score = 0;
+        spawnNewNumber();
+        spawnNewNumber();
+    }
+
+    public void setListener(FieldListener listener) {
+        this.listener = listener;
+    }
+
     public GameField() {
         this.gameField = new Integer[axisSize][axisSize];
         for (int i = 0; i < gameField.length; ++i) {
