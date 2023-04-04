@@ -1,4 +1,4 @@
-package ru.nsu.fit.mihanizzm.jdu;
+package ru.nsu.fit.mihanizzm.jdu.model;
 
 import java.nio.file.Path;
 

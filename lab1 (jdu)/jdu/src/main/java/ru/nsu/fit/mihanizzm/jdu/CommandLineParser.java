@@ -7,13 +7,15 @@ public class CommandLineParser {
     static final private Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));
     static final private int DEFAULT_DEPTH = 3;
     static final private int DEFAULT_LIMIT = 5;
+    // CR: naming
     static final private boolean IS_NOT_CHECKING_SYMLINKS = false;
 
     static private int getArgValue(int index, String[] args) throws CommandLineException {
         int argValue;
-        if (index + 1 == args.length) {
+        if (index + 1 >= args.length) {
             throw new NoArgumentValueException("The option \"" + args[index] + "\" is the last argument but this option requires an integer value after it.");
         }
+        // CR: move to separate method
         try {
             argValue = Integer.parseInt(args[index + 1]);
         }
@@ -55,6 +57,7 @@ public class CommandLineParser {
                 }
                 index += 1;
             } else {
+                // CR: CommandLineArgumentsException
                 throw new UnknownArgumentException("The option \"" + args[index] + "\" is unknown.");
             }
         }

@@ -1,18 +1,22 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
+
 import java.util.HashSet;
 
 public class JDU {
     public static void main(String[] args) {
         try {
-            HashSet<DuFile> visitedFiles = new HashSet<>();
             CommandLineOptions opts = CommandLineParser.getCmdOptions(args);
             DuFile root = DuTreeBuilder.buildFileTree(opts);
-            DuPrinter.printInfoInStream(System.out, root, opts, visitedFiles);
+            // CR: move to printer
+            HashSet<DuFile> visitedFiles = new HashSet<>();
+            DuPrinter.print(System.out, root, opts, visitedFiles);
         }
         catch (DuException exception) {
             System.err.println(exception.getMessage());
             if (exception instanceof CommandLineException) {
+                // CR: separate method
                 System.out.println("""
                         Usage:
                         '--limit n' - show maximum n heaviest files in each directory. n - an integer number. Default n is 5

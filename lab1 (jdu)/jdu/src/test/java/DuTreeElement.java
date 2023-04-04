@@ -1,4 +1,7 @@
-import ru.nsu.fit.mihanizzm.jdu.*;
+import ru.nsu.fit.mihanizzm.jdu.model.Directory;
+import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
+import ru.nsu.fit.mihanizzm.jdu.model.RegularFile;
+import ru.nsu.fit.mihanizzm.jdu.model.SymLink;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;

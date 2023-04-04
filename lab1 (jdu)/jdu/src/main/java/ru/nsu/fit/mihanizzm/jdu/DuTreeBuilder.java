@@ -1,30 +1,54 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.model.Directory;
+import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
+import ru.nsu.fit.mihanizzm.jdu.model.RegularFile;
+import ru.nsu.fit.mihanizzm.jdu.model.SymLink;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class DuTreeBuilder {
     static private final int ZERO_DEPTH = 0;
     static private final int DEFAULT_SYMLINK_SIZE = 0;
 
+    public static DuFile buildFileTree(CommandLineOptions options) {
+        DuFile root = null;
+
+        Path rootPath = options.rootPath();
+        boolean checkingSymLinks = options.isCheckingSymLinks();
+        if (Files.isDirectory(rootPath)) {
+            root = getNewDuFile(rootPath, FileType.DIRECTORY, ZERO_DEPTH, checkingSymLinks);
+        } else if (Files.isRegularFile(rootPath)) {
+            // CR: separate method for each file type, remove FileType parameter
+            root = getNewDuFile(rootPath, FileType.REGULAR_FILE, ZERO_DEPTH, checkingSymLinks);
+        } else if (Files.isSymbolicLink(rootPath)) {
+            root = getNewDuFile(rootPath, FileType.SYMLINK, ZERO_DEPTH, checkingSymLinks);
+        }
+
+        return root;
+    }
+
     private static DuFile getNewDuFile(Path path, FileType type, int depth, boolean checkingLinks) {
         long size = 0;
         boolean unknownSize = false;
         try {
+            // CR: calculate size after building children nodes
             size = getSizeOfFile(path);
         }
         catch (UnknownSizeOfFileException error) {
             unknownSize = true;
         }
+
         String name = getNameOfFile(path);
 
         if (type == FileType.REGULAR_FILE) {
             RegularFile regularFile = new RegularFile(path, size, name, depth, checkingLinks);
+            // CR: set -1 to size
             regularFile.setHasUnknownSize(unknownSize);
             return regularFile;
         } else if (type == FileType.DIRECTORY) {
@@ -35,15 +59,20 @@ public class DuTreeBuilder {
             SymLink symLink = new SymLink(path, size, name, depth, checkingLinks);
             Path realPath;
             try {
+                // CR: move before ctor, pass result to ctor
                 realPath = symLink.getPath().toRealPath();
             }
             catch (IOException error) {
+                // CR: log error
+                // CR: build symlink with unknown target
                 throw new UnknownRealPathException("The symlink on path: \"" + symLink.getPath() + "\" has unknown real path, or the real path can't be accessed.");
             }
             symLink.setHasUnknownSize(unknownSize);
             symLink.setRealPath(realPath);
             return symLink;
         } else {
+            // CR: log error
+            // CR: add UnknownFile { name, size }
             throw new TreeBuilderFileTypeException("Chosen file type: \"" + type.toString() + "\" is invalid. Available file types are: REGULAR_FILE, DIRECTORY, SYMLINK.");
         }
     }
@@ -74,6 +103,7 @@ public class DuTreeBuilder {
                         size += 0;
                     }
                 }
+                // CR: add test
                 else if (Files.isSymbolicLink(file)) {
                     try {
                         size += Files.size(file);
@@ -99,6 +129,7 @@ public class DuTreeBuilder {
         return size;
     }
 
+    // CR: build whole tree in DuTreeBuilder
     public static List<DuFile> createChildren(Directory directory) {
         List<DuFile> children = new ArrayList<>();
         List<Path> childrenList;
@@ -127,12 +158,6 @@ public class DuTreeBuilder {
         return children;
     }
 
-    static public List<DuFile> getLimitedChildren(Directory dir, int limit) {
-        List<DuFile> unsortedChildren = dir.getChildren();
-        unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
-        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
-    }
-
     public static DuFile resolveSymLink(SymLink symlink) {
         Path realPath = symlink.getRealPath();
 
@@ -148,20 +173,7 @@ public class DuTreeBuilder {
         }
     }
 
-    public static DuFile buildFileTree(CommandLineOptions options) {
-        DuFile root = null;
-
-        if (Files.isDirectory(options.rootPath())) {
-            root = getNewDuFile(options.rootPath(), FileType.DIRECTORY, ZERO_DEPTH, options.isCheckingSymLinks());
-        } else if (Files.isRegularFile(options.rootPath())) {
-            root = getNewDuFile(options.rootPath(), FileType.REGULAR_FILE, ZERO_DEPTH, options.isCheckingSymLinks());
-        } else if (Files.isSymbolicLink(options.rootPath())) {
-            root = getNewDuFile(options.rootPath(), FileType.SYMLINK, ZERO_DEPTH, options.isCheckingSymLinks());
-        }
-
-        return root;
-    }
-
+    // CR: remove
     enum FileType {
         REGULAR_FILE,
         DIRECTORY,

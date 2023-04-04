@@ -1,14 +1,16 @@
-package ru.nsu.fit.mihanizzm.jdu;
+package ru.nsu.fit.mihanizzm.jdu.model;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
     private final Path path;
     private final long size;
     private final String name;
+    // CR: move to printer
     private final int depth;
+    // CR: move to printer
     private final boolean isCheckingSymLinks;
+    // CR: redundant, use size
     private boolean hasUnknownSize;
 
     public long getSize() {
@@ -29,7 +31,7 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
 
     public boolean getHasUnknownSize() { return this.hasUnknownSize; }
 
-    void setHasUnknownSize(boolean res) { this.hasUnknownSize = res; }
+    public void setHasUnknownSize(boolean res) { this.hasUnknownSize = res; }
 
     @Override
     public int hashCode() {

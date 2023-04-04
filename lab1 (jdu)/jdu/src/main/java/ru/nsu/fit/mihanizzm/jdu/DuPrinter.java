@@ -1,15 +1,22 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.model.Directory;
+import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
+import ru.nsu.fit.mihanizzm.jdu.model.RegularFile;
+import ru.nsu.fit.mihanizzm.jdu.model.SymLink;
+
 import java.io.PrintStream;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
 public class DuPrinter {
-    final private static long KIBIBYTE = 1024;
-    final private static long MEBIBYTE = KIBIBYTE * 1024;
-    final private static long GIBIBYTE = MEBIBYTE * 1024;
-    final private static long TEBIBYTE = GIBIBYTE * 1024;
+    private static final long KIBIBYTE = 1024;
+    private static final long MEBIBYTE = KIBIBYTE * 1024;
+    private static final long GIBIBYTE = MEBIBYTE * 1024;
+    private static final long TEBIBYTE = GIBIBYTE * 1024;
 
+//    CR:
 //    enum Size {
 //        KB("KiB", 1024),
 //        MB,
@@ -35,6 +42,7 @@ public class DuPrinter {
 //        }
 //    }
     private static String convertSize(long size) {
+        assert size >= 0;
         if (size < KIBIBYTE) {
             return String.format("%dB", size);
         }
@@ -56,9 +64,7 @@ public class DuPrinter {
         }
     }
 
-    // foo
-    //   symlink
-
+    // CR: non-static, add field 'printStream'
     private static String getPrintInfo(DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) {
         if (file.getDepth() > opts.depth() || !visited.add(file)) {
             return "";
@@ -90,7 +96,7 @@ public class DuPrinter {
 
                 resultString.append(directory.getName()).append(" [").append(convertSize(directory.getSize())).append("]\n");
 
-                for (DuFile child: DuTreeBuilder.getLimitedChildren(directory, opts.limit())) {
+                for (DuFile child: getLimitedChildren(directory, opts.limit())) {
                     resultString.append(getPrintInfo(child, opts, visited));
                 }
             }
@@ -98,7 +104,14 @@ public class DuPrinter {
         return resultString.toString();
     }
 
-    public static void printInfoInStream(PrintStream printStream, DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) {
+    // CR: only public method
+    public static void print(PrintStream printStream, DuFile file, CommandLineOptions opts, HashSet<DuFile> visited) {
         printStream.append(getPrintInfo(file, opts, visited));
+    }
+
+    public static List<DuFile> getLimitedChildren(Directory dir, int limit) {
+        List<DuFile> unsortedChildren = dir.getChildren();
+        unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
+        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
     }
 }

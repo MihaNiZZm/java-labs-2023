@@ -1,7 +1,7 @@
 import ru.nsu.fit.mihanizzm.jdu.DuTreeBuilder;
 import junit.framework.TestCase;
 import org.junit.Test;
-import ru.nsu.fit.mihanizzm.jdu.DuFile;
+import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
 import ru.nsu.fit.mihanizzm.jdu.CommandLineOptions;
 
 import java.io.IOException;
