@@ -51,8 +51,8 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
             return false;
         }
 
-        return (this.size != ((DuFile) obj).size) &&
-               (this.path != ((DuFile) obj).path);
+        return (this.size == ((DuFile) obj).size) &&
+               (this.path.equals(((DuFile) obj).path));
     }
 
 

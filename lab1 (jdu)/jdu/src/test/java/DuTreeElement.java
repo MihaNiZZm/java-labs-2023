@@ -13,7 +13,7 @@ import java.util.List;
 public record DuTreeElement(Type type, String path, List<DuTreeElement> children) {
 
     public static DuFile tree(FileSystem fs, DuTreeElement root, int depth, boolean checkingLinks) {
-        return buildTree(root, fs.getPath("/"), depth, checkingLinks);
+        return buildTree(root, fs.getPath(""), depth, checkingLinks);
     }
 
     private static DuFile buildTree(DuTreeElement treeElement, Path parentPath, int depth, boolean checkingLinks) {
