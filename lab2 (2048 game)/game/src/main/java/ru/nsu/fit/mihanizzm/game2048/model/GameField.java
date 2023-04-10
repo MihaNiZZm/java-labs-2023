@@ -1,17 +1,50 @@
 package ru.nsu.fit.mihanizzm.game2048.model;
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class GameField {
     private final Integer[][] gameField;
-    private final Integer axisSize = 4;
+    private final Integer axisSize;
     private Integer score;
     private FieldListener listener;
+    private Stopwatch time;
+    private boolean has2048 = false;
 
     public Integer[][] getGameField() {
         return gameField;
+    }
+
+    public void initTimer(ActionListener listener) {
+        this.time = new Stopwatch(listener);
+    }
+
+    public void startTime() {
+        time.start();
+    }
+
+    public void stopTimer() {
+        time.stop();
+    }
+
+    public void resetTimer() {
+        time.reset();
+    }
+
+    public GameField(int axisSize) {
+        this.time = null;
+        this.axisSize = axisSize;
+        this.gameField = new Integer[axisSize][axisSize];
+        for (int i = 0; i < gameField.length; ++i) {
+            for (int j = 0; j < gameField.length; ++j) {
+                gameField[i][j] = 0;
+            }
+        }
+        this.score = 0;
+        spawnNewNumber();
+        spawnNewNumber();
     }
 
     public void clear() {
@@ -27,18 +60,6 @@ public class GameField {
 
     public void setListener(FieldListener listener) {
         this.listener = listener;
-    }
-
-    public GameField() {
-        this.gameField = new Integer[axisSize][axisSize];
-        for (int i = 0; i < gameField.length; ++i) {
-            for (int j = 0; j < gameField.length; ++j) {
-                gameField[i][j] = 0;
-            }
-        }
-        this.score = 0;
-        spawnNewNumber();
-        spawnNewNumber();
     }
 
     public boolean hasEnded() {
@@ -99,7 +120,23 @@ public class GameField {
                cantMoveInDirection(Direction.RIGHT);
     }
 
-    public boolean move(Direction dir) {
+    private boolean reached2048() {
+        int maxFieldNumber = 0;
+        for (int i = 0; i < axisSize; ++i) {
+            for (int j = 0; j < axisSize; ++j) {
+                if (maxFieldNumber < gameField[i][j]) {
+                    maxFieldNumber = gameField[i][j];
+                }
+            }
+        }
+        if (!has2048 && maxFieldNumber == 2048) {
+            has2048 = true;
+
+        }
+        return false;
+    }
+
+    public void move(Direction dir) {
         boolean result;
         result = switch (dir) {
             case LEFT -> moveLeft();
@@ -110,7 +147,7 @@ public class GameField {
         if (result) {
             spawnNewNumber();
         }
-        return result;
+        listener.update(reached2048(), hasNoMoreMoves());
     }
 
     private boolean moveLeft() {
@@ -327,6 +364,14 @@ public class GameField {
     }
 
     private boolean isEmptySlot(int rowIndex, int colIndex) { return gameField[rowIndex][colIndex] == 0; }
+
+    public int getScore() {
+        return this.score;
+    }
+
+    public String getTime() {
+        return this.time.totalTimeString;
+    }
 
     public enum Direction {
         LEFT,
