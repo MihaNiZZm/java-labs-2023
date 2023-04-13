@@ -5,12 +5,22 @@ import java.awt.*;
 
 public class RoundedRect extends JLabel {
     private Color color;
-    int arcRadius = Math.min(getWidth() / 3, getHeight() / 3);
+    private int arcRadius = Math.min(getWidth() / 3, getHeight() / 3);
 
-    public RoundedRect(Color color) {
-        this.color = color;
-        setSize(100, 100);
+    public void setColor(Color newColor) {
+        color = newColor;
+        repaint();
     }
+
+    public void setArcRadius(int arcRadius) {
+        this.arcRadius = arcRadius;
+        repaint();
+    }
+
+    public RoundedRect() {
+        this.color = Color.black;
+    }
+
     public RoundedRect(Color color, int width, int height) {
         this.color = color;
         setSize(width, height);
