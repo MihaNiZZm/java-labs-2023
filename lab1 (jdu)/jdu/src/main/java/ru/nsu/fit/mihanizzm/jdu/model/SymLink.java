@@ -13,7 +13,7 @@ final public class SymLink extends DuFile {
         this.realPath = realPath;
     }
 
-    public SymLink(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
-        super(path, size, name, depth, isCheckingSymLinks);
+    public SymLink(Path path, long size, String name) {
+        super(path, size, name);
     }
 }

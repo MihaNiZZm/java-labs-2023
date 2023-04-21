@@ -2,16 +2,20 @@ package ru.nsu.fit.mihanizzm.jdu.model;
 
 import java.nio.file.Path;
 
-public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
+public abstract sealed class DuFile permits Directory, RegularFile, SymLink, UnknownFile {
     private final Path path;
     private final long size;
     private final String name;
     // CR: move to printer
-    private final int depth;
+//    private final int depth;
     // CR: move to printer
-    private final boolean isCheckingSymLinks;
+//    private final boolean isCheckingSymLinks;
     // CR: redundant, use size
-    private boolean hasUnknownSize;
+//    private boolean hasUnknownSize;
+
+    public boolean hasUnknownSize() {
+        return size == -1;
+    }
 
     public long getSize() {
         return this.size;
@@ -21,17 +25,7 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
         return this.name;
     }
 
-    public int getDepth() {
-        return this.depth;
-    }
-
     public Path getPath() { return  this.path; }
-
-    public boolean getCheckingLinks() { return this.isCheckingSymLinks; }
-
-    public boolean getHasUnknownSize() { return this.hasUnknownSize; }
-
-    public void setHasUnknownSize(boolean res) { this.hasUnknownSize = res; }
 
     @Override
     public int hashCode() {
@@ -57,12 +51,10 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink {
 
 
 
-    protected DuFile(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
+    protected DuFile(Path path, long size, String name) {
         this.path = path;
         this.size = size;
         this.name = name;
-        this.depth = depth;
-        this.isCheckingSymLinks = isCheckingSymLinks;
     }
 }
 

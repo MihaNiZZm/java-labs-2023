@@ -21,7 +21,7 @@ public class DuTreeBuilderTest extends DuTest {
         CommandLineOptions opts = new CommandLineOptions(fooPath, 3, 5, false);
 
         DuFile actual = DuTreeBuilder.buildFileTree(opts);
-        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo", DuTreeElement.file("bar.txt")), 5, false);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo", DuTreeElement.file("bar.txt")));
         TestCase.assertEquals(expected, actual);
     }
 }

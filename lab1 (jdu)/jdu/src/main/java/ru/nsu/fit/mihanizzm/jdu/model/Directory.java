@@ -6,22 +6,14 @@ import java.util.List;
 
 // CR: toString
 final public class Directory extends DuFile {
-    private List<DuFile> children;
+    private final List<DuFile> children;
 
     public List<DuFile> getChildren() {
         return children;
     }
 
-    public void setChildren(List<DuFile> childrenList) {
-        this.children = childrenList;
-    }
-
-    public Directory(Path path, long size, String name, int depth, boolean isCheckingSymLinks) {
-        super(path, size, name, depth, isCheckingSymLinks);
-    }
-
-    public Directory(Path path, long size, String name, int depth, boolean isCheckingSymLinks, List<DuFile> newChildren) {
-        super(path, size, name, depth, isCheckingSymLinks);
+    public Directory(Path path, long size, String name, List<DuFile> newChildren) {
+        super(path, size, name);
         children = newChildren;
     }
 }

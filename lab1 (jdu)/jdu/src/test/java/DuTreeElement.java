@@ -12,11 +12,11 @@ import java.util.List;
 
 public record DuTreeElement(Type type, String path, List<DuTreeElement> children) {
 
-    public static DuFile tree(FileSystem fs, DuTreeElement root, int depth, boolean checkingLinks) {
-        return buildTree(root, fs.getPath(""), depth, checkingLinks);
+    public static DuFile tree(FileSystem fs, DuTreeElement root) {
+        return buildTree(root, fs.getPath(""));
     }
 
-    private static DuFile buildTree(DuTreeElement treeElement, Path parentPath, int depth, boolean checkingLinks) {
+    private static DuFile buildTree(DuTreeElement treeElement, Path parentPath) {
         Path currentPath = parentPath.resolve(treeElement.path);
         long size;
         String name = currentPath.getFileName().toString();
@@ -28,14 +28,14 @@ public record DuTreeElement(Type type, String path, List<DuTreeElement> children
             catch (IOException error) {
                 size = 0;
             }
-            return new RegularFile(currentPath, size, name, depth, checkingLinks);
+            return new RegularFile(currentPath, size, name);
         } else if (treeElement.type == Type.SYM) {
             size = 0;
-            return new SymLink(currentPath, size, name, depth, checkingLinks);
+            return new SymLink(currentPath, size, name);
         } else if (treeElement.type == Type.DIR) {
             size = treeElement.getDirSize(currentPath);
-            List<DuFile> children = treeElement.children.stream().map(c -> buildTree(c, currentPath, depth + 1, checkingLinks)).toList();
-            return new Directory(currentPath, size, name, depth, checkingLinks, children);
+            List<DuFile> children = treeElement.children.stream().map(c -> buildTree(c, currentPath)).toList();
+            return new Directory(currentPath, size, name, children);
         }
         else {
             throw new RuntimeException("Unknown file type.");
