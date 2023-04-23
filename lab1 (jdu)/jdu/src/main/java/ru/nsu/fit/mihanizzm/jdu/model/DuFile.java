@@ -6,12 +6,6 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
     private final Path path;
     private final long size;
     private final String name;
-    // CR: move to printer
-//    private final int depth;
-    // CR: move to printer
-//    private final boolean isCheckingSymLinks;
-    // CR: redundant, use size
-//    private boolean hasUnknownSize;
 
     public boolean hasUnknownSize() {
         return size == -1;
@@ -25,7 +19,7 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
         return this.name;
     }
 
-    public Path getPath() { return  this.path; }
+    public Path getPath() { return this.path; }
 
     @Override
     public int hashCode() {
@@ -49,12 +43,24 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
                (this.path.equals(((DuFile) obj).path));
     }
 
-
-
     protected DuFile(Path path, long size, String name) {
         this.path = path;
         this.size = size;
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "<DuFile>\n\n" +
+                "File size: " +
+                this.size +
+                "\n" +
+                "File path: " +
+                this.path +
+                "\n" +
+                "File name: " +
+                this.name +
+                "\n\n";
     }
 }
 

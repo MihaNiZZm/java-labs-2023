@@ -4,12 +4,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class CommandLineParser {
-    static final private Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));
-    static final private int DEFAULT_DEPTH = 3;
-    static final private int DEFAULT_LIMIT = 5;
-    static final private boolean NOT_CHECKING = false;
+    private static final Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));
+    private static final int DEFAULT_DEPTH = 3;
+    private static final int DEFAULT_LIMIT = 5;
+    private static final boolean NOT_CHECKING = false;
 
-    static private int parseValue(String[] args, int index) {
+    private static int parseValue(String[] args, int index) {
         int argValue;
         try {
             argValue = Integer.parseInt(args[index + 1]);
@@ -23,7 +23,7 @@ public class CommandLineParser {
         return argValue;
     }
 
-    static private int getArgValue(int index, String[] args) throws CommandLineArgumentsException {
+    private static int getArgValue(int index, String[] args) throws CommandLineArgumentsException {
         int argValue;
         if (index + 1 >= args.length) {
             throw new CommandLineArgumentsException("The option \"" + args[index] + "\" is the last argument but this option requires an integer value after it.");
@@ -32,14 +32,26 @@ public class CommandLineParser {
         return argValue;
     }
 
-    static CommandLineOptions getCmdOptions(String[] args) throws CommandLineArgumentsException {
+    /**
+     * The method gets args from command line and parses it to options that will be used in a program further.
+     * Default parameters values are:
+     * depth = 3;
+     * limit = 5;
+     * isCheckingLinks = false;
+     * rootPath = Path.of(System.getProperty("user.dir")).
+     *
+     * @param args an array of String variables that describe options a user want to create.
+     * @return an instance of CommandLineOptions record which has 'rootPath', 'limit', 'depth' and 'isCheckingLinks' fields.
+     * @throws CommandLineArgumentsException if the arguments are invalid (depth or limit are <= 0 or rootPath doesn't exist).
+     */
+    public static CommandLineOptions getCmdOptions(String[] args) throws CommandLineArgumentsException {
         int index = 0;
         int depth = DEFAULT_DEPTH;
         int limit = DEFAULT_LIMIT;
         boolean isCheckingSymLinks = NOT_CHECKING;
         Path rootFilePath = DEFAULT_ROOT_PATH;
 
-        if (args.length == 0) {
+        if (args.length == 0 || (args.length == 1 && args[0].equals(""))) {
             return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
         }
 
@@ -67,7 +79,7 @@ public class CommandLineParser {
         return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
     }
 
-    static public String showUsage() {
+    public static String showUsage() {
     return ("""
     Usage:
     '--limit n' - show maximum n heaviest files in each directory. n - an integer number. Default n is 5

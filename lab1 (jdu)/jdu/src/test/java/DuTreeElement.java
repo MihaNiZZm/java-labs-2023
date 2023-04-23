@@ -31,7 +31,14 @@ public record DuTreeElement(Type type, String path, List<DuTreeElement> children
             return new RegularFile(currentPath, size, name);
         } else if (treeElement.type == Type.SYM) {
             size = 0;
-            return new SymLink(currentPath, size, name);
+            Path realPath;
+            try {
+                realPath = currentPath.toRealPath();
+            }
+            catch (IOException error) {
+                realPath = null;
+            }
+            return new SymLink(currentPath, size, name, realPath);
         } else if (treeElement.type == Type.DIR) {
             size = treeElement.getDirSize(currentPath);
             List<DuFile> children = treeElement.children.stream().map(c -> buildTree(c, currentPath)).toList();

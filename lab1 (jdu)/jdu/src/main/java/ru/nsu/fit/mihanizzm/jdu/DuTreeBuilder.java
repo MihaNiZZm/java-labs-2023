@@ -48,7 +48,14 @@ public class DuTreeBuilder {
     }
 
     private static SymLink getNewSymLink(Path rootPath) {
-        return new SymLink(rootPath, DEFAULT_SYMLINK_SIZE, getNameOfFile(rootPath));
+        Path realPath;
+        try {
+            realPath = rootPath.toRealPath();
+        }
+        catch (IOException error) {
+            realPath = null;
+        }
+        return new SymLink(rootPath, DEFAULT_SYMLINK_SIZE, getNameOfFile(rootPath), realPath);
     }
 
     private static UnknownFile getNewUnknownFile(Path rootPath) {

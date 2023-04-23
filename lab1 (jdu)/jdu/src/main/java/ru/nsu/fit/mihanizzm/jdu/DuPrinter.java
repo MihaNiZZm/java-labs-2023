@@ -6,11 +6,6 @@ import java.io.PrintStream;
 import java.util.HashSet;
 
 public class DuPrinter {
-    private static final long KIBIBYTE = 1024;
-    private static final long MEBIBYTE = KIBIBYTE * 1024;
-    private static final long GIBIBYTE = MEBIBYTE * 1024;
-    private static final long TEBIBYTE = GIBIBYTE * 1024;
-
     private final CommandLineOptions options;
     private PrintStream printStream;
     private final HashSet<DuFile> visitedFiles;
@@ -28,6 +23,8 @@ public class DuPrinter {
     public void setPrintStream(PrintStream printStream) {
         this.printStream = printStream;
     }
+
+    public PrintStream getPrintStream() { return this.printStream; }
 
     enum Size {
         KB("KiB", 1024),

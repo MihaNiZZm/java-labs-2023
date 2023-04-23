@@ -22,6 +22,91 @@ public class DuTreeBuilderTest extends DuTest {
 
         DuFile actual = DuTreeBuilder.buildFileTree(opts);
         DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo", DuTreeElement.file("bar.txt")));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testManyFilesInDirectory() throws IOException {
+        FileSystem fs = fileSystem();
+        Path fooPath = fs.getPath("foo");
+        Files.createDirectory(fooPath);
+        Path barPath = fooPath.resolve("bar.txt");
+        Path fizPath = fooPath.resolve("fiz.txt");
+        Path bazPath = fooPath.resolve("baz.txt");
+        Path bozPath = fooPath.resolve("boz.txt");
+        Path bezPath = fooPath.resolve("bez.txt");
+
+        Files.createFile(barPath);
+        Files.createFile(fizPath);
+        Files.createFile(bazPath);
+        Files.createFile(bozPath);
+        Files.createFile(bezPath);
+
+        CommandLineOptions opts = new CommandLineOptions(fooPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo",
+                DuTreeElement.file("bar.txt"),
+                DuTreeElement.file("fiz.txt"),
+                DuTreeElement.file("baz.txt"),
+                DuTreeElement.file("boz.txt"),
+                DuTreeElement.file("bez.txt")));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDirectoryInDirectoryInDirectory() throws IOException {
+        FileSystem fs = fileSystem();
+        Path fooPath = fs.getPath("foo");
+        Files.createDirectory(fooPath);
+        Path barPath = fooPath.resolve("bar");
+        Files.createDirectory(barPath);
+        Path bazPath = barPath.resolve("baz");
+        Files.createDirectory(bazPath);
+
+        CommandLineOptions opts = new CommandLineOptions(fooPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo", DuTreeElement.dir("bar", DuTreeElement.dir("baz"))));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSymLink() throws IOException {
+        FileSystem fs = fileSystem();
+
+        Path fooPath = fs.getPath("foo");
+        Files.createDirectory(fooPath);
+
+        Path linkedFilePath = fooPath.resolve("file");
+        Files.createFile(linkedFilePath);
+
+        Path linkPath = fooPath.resolve("link");
+        Files.createLink(linkPath, linkedFilePath);
+
+        CommandLineOptions opts = new CommandLineOptions(fooPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.dir("foo", DuTreeElement.file("link")));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testOnlyRegularFile() throws IOException {
+        FileSystem fs = fileSystem();
+
+        Path fooPath = fs.getPath("foo");
+        Files.createFile(fooPath);
+
+        CommandLineOptions opts = new CommandLineOptions(fooPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("foo"));
+
         TestCase.assertEquals(expected, actual);
     }
 }
