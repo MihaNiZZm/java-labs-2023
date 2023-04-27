@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public class DuOptionsTest extends DuTest {
     @Test
     public void testDefaultOptions() {
-        String[] args = { "" };
+        String[] args = { };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
         CommandLineOptions expected = new CommandLineOptions(Path.of(System.getProperty("user.dir")), 5, 3, false);
@@ -66,4 +66,17 @@ public class DuOptionsTest extends DuTest {
 
         TestCase.assertEquals(expected, actual);
     }
+    /*
+
+    CR: missing tests:
+
+    - all combinations (8)
+    - invalid path
+    - too many paths
+    - negative number
+    - too big number
+    - unknown option
+    - escaped folder with spaces foo\ bar
+     */
+
 }

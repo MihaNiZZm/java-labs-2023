@@ -40,6 +40,8 @@ public class CommandLineParser {
      * isCheckingLinks = false;
      * rootPath = Path.of(System.getProperty("user.dir")).
      *
+     * CR: {@link #showUsage()}
+     *
      * @param args an array of String variables that describe options a user want to create.
      * @return an instance of CommandLineOptions record which has 'rootPath', 'limit', 'depth' and 'isCheckingLinks' fields.
      * @throws CommandLineArgumentsException if the arguments are invalid (depth or limit are <= 0 or rootPath doesn't exist).
@@ -51,7 +53,7 @@ public class CommandLineParser {
         boolean isCheckingSymLinks = NOT_CHECKING;
         Path rootFilePath = DEFAULT_ROOT_PATH;
 
-        if (args.length == 0 || (args.length == 1 && args[0].equals(""))) {
+        if (args.length == 0) {
             return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
         }
 
@@ -80,16 +82,16 @@ public class CommandLineParser {
     }
 
     public static String showUsage() {
-    return ("""
-    Usage:
-    '--limit n' - show maximum n heaviest files in each directory. n - an integer number. Default n is 5
-    '--depth n' - show maximum n levels of depth of a root directory. n - an integer number.
-    Default value for n is 3. Example: root directory: 'D:/'. Imagine you have file with path 'D:/dir1/dir2/dir3/dir4/file'.
-    Then you can see a file only if your depth value is 5 or higher. If you depth value is 3 you will see all directories and files until dir3 level.
-    If you have 0 depth you will only see size of a root directory without files it contains.
-    '-L' - go throw symbolic links' real path. False by default.
-    The last argument of your command line is your root path. The path can not contain spaces in it's name.
-    Default root path is the path from which you launched the program.
-    """);
+    return """
+            Usage:
+            '--limit n' - show maximum n heaviest files in each directory. n - an integer number. Default n is 5
+            '--depth n' - show maximum n levels of depth of a root directory. n - an integer number.
+            Default value for n is 3. Example: root directory: 'D:/'. Imagine you have file with path 'D:/dir1/dir2/dir3/dir4/file'.
+            Then you can see a file only if your depth value is 5 or higher. If you depth value is 3 you will see all directories and files until dir3 level.
+            If you have 0 depth you will only see size of a root directory without files it contains.
+            '-L' - go throw symbolic links' real path. False by default.
+            The last argument of your command line is your root path. The path can not contain spaces in it's name.
+            Default root path is the path from which you launched the program.
+            """;
     }
 }

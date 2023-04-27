@@ -2,8 +2,9 @@ package ru.nsu.fit.mihanizzm.jdu.model;
 
 import java.nio.file.Path;
 
-final public class SymLink extends DuFile {
+public final class SymLink extends DuFile {
     private final Path realPath;
+//  CR:  private final DuFile realFile;
 
     public Path getRealPath() {
         return this.realPath;

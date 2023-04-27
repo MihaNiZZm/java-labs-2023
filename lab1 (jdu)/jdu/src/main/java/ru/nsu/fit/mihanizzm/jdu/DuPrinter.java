@@ -7,24 +7,23 @@ import java.util.HashSet;
 
 public class DuPrinter {
     private final CommandLineOptions options;
-    private PrintStream printStream;
+    private final PrintStream printStream;
     private final HashSet<DuFile> visitedFiles;
     private int currentDepth;
     private boolean isFromSymLink;
 
-    public DuPrinter(CommandLineOptions opts) {
+    public DuPrinter(CommandLineOptions opts, PrintStream printStream) {
         this.options = opts;
-        this.printStream = null;
+        this.printStream = printStream;
+
         this.visitedFiles = new HashSet<>();
         this.currentDepth = 0;
         this.isFromSymLink = false;
     }
 
-    public void setPrintStream(PrintStream printStream) {
-        this.printStream = printStream;
-    }
-
-    public PrintStream getPrintStream() { return this.printStream; }
+//    public static void print(DuFile root, CommandLineOptions opts, PrintStream printStream) {
+//
+//    }
 
     enum Size {
         KB("KiB", 1024),
@@ -53,6 +52,26 @@ public class DuPrinter {
         }
     }
 
+    /*
+
+
+   CR:
+
+    foo
+      slink1 -> bar
+
+    bar
+      slink2 -> foo
+
+    depth = 5
+
+    foo
+      slink1 -> bar
+        bar
+          slink2 -> foo
+
+
+     */
     public void getPrintInfo(DuFile file) {
         if (printStream == null) {
             throw new PrinterException("Print stream was not set. Can't print to null print stream.");

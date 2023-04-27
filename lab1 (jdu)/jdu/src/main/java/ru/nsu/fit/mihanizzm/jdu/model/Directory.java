@@ -3,7 +3,7 @@ package ru.nsu.fit.mihanizzm.jdu.model;
 import java.nio.file.Path;
 import java.util.List;
 
-final public class Directory extends DuFile {
+public final class Directory extends DuFile {
     private final List<DuFile> children;
 
     public List<DuFile> getChildren() {

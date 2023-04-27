@@ -7,8 +7,7 @@ public class JDU {
         try {
             CommandLineOptions opts = CommandLineParser.getCmdOptions(args);
             DuFile root = DuTreeBuilder.buildFileTree(opts);
-            DuPrinter printer = new DuPrinter(opts);
-            printer.setPrintStream(System.out);
+            DuPrinter printer = new DuPrinter(opts, System.out);
             printer.getPrintInfo(root);
         }
         catch (DuException exception) {

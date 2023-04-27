@@ -9,10 +9,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
+// CR: javadoc
 public class DuTreeBuilder {
-    static private final int UNKNOWN_FILE_SIZE = -1;
-    static private final int DEFAULT_SYMLINK_SIZE = 0;
+    private static final int UNKNOWN_FILE_SIZE = -1;
+    // CR: find out how to find size
+    private static final int DEFAULT_SYMLINK_SIZE = 0;
 
     private static Directory getNewDirectory(Path rootPath) {
         long size = 0;
@@ -74,6 +77,7 @@ public class DuTreeBuilder {
         }
     }
 
+    // CR: call in printer based on path
     private static String getNameOfFile(Path filePath) {
         return filePath.getFileName().toString();
     }
@@ -82,6 +86,7 @@ public class DuTreeBuilder {
         List<DuFile> children = new ArrayList<>();
         List<Path> childrenList;
         try {
+            // CR: close list
             childrenList = Files.list(dirPath).toList();
         }
         catch (IOException error) {
@@ -95,6 +100,7 @@ public class DuTreeBuilder {
             } else if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
                 RegularFile childRegularFile = getNewRegularFile(child);
                 children.add(childRegularFile);
+                // CR: make it first condition, remove LinkOption.NOFOLLOW_LINKS
             } else if (Files.isSymbolicLink(child)) {
                 SymLink childSymLink = getNewSymLink(child);
                 children.add(childSymLink);

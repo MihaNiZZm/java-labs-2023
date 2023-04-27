@@ -10,6 +10,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DuTreeBuilderTest extends DuTest {
+
+    /*
+
+    CR:
+    - regular file
+    - symlink
+    - directory with regular file
+    - empty directory
+    - directory with symlink
+    - directory with another dir
+    - recursive symlink
+    - unknown file?
+
+     */
+
     @Test
     public void testOneFileInDirectory() throws IOException {
         FileSystem fs = fileSystem();
