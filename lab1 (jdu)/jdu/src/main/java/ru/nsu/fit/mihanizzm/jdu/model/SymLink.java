@@ -3,16 +3,22 @@ package ru.nsu.fit.mihanizzm.jdu.model;
 import java.nio.file.Path;
 
 public final class SymLink extends DuFile {
-    private final Path realPath;
-//  CR:  private final DuFile realFile;
-
+    private Path realPath;
+    private DuFile realFile;
     public Path getRealPath() {
         return this.realPath;
     }
 
-    public SymLink(Path path, long size, String name, Path realPath) {
-        super(path, size, name);
+    public DuFile getRealFile() { return realFile; }
+
+    public void setRealFile(DuFile realFile) { this.realFile = realFile; }
+
+    public void setRealPath(Path realPath) { this.realPath = realPath; }
+
+    public SymLink(Path path, long size, Path realPath, DuFile realFile) {
+        super(path, size);
         this.realPath = realPath;
+        this.realFile = realFile;
     }
 
     @Override
@@ -23,9 +29,6 @@ public final class SymLink extends DuFile {
                 "\n" +
                 "File path: " +
                 this.getPath() +
-                "\n" +
-                "File name: " +
-                this.getName() +
                 "\n" +
                 "File real path: " +
                 this.getRealPath() +

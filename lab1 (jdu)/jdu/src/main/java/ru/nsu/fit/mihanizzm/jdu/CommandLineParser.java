@@ -1,6 +1,7 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
 public class CommandLineParser {
@@ -34,17 +35,16 @@ public class CommandLineParser {
 
     /**
      * The method gets args from command line and parses it to options that will be used in a program further.
-     * Default parameters values are:
-     * depth = 3;
-     * limit = 5;
-     * isCheckingLinks = false;
-     * rootPath = Path.of(System.getProperty("user.dir")).
-     *
-     * CR: {@link #showUsage()}
-     *
+     * Default parameters values are: <ul>
+     *     <li>depth = 3</li>
+     *     <li>limit = 5</li>
+     *     <li>isCheckingLinks = false</li>
+     *     <li>rootPath = Path.of(System.getProperty("user.dir"))</li>
+     * </ul>
+     * More info about default values and usage of options: {@link #showUsage()}.
      * @param args an array of String variables that describe options a user want to create.
      * @return an instance of CommandLineOptions record which has 'rootPath', 'limit', 'depth' and 'isCheckingLinks' fields.
-     * @throws CommandLineArgumentsException if the arguments are invalid (depth or limit are <= 0 or rootPath doesn't exist).
+     * @throws CommandLineArgumentsException if the arguments are invalid (depth or limit are < 0 or rootPath doesn't exist).
      */
     public static CommandLineOptions getCmdOptions(String[] args) throws CommandLineArgumentsException {
         int index = 0;
@@ -67,15 +67,25 @@ public class CommandLineParser {
             } else if (args[index].equals("-L")) {
                 isCheckingSymLinks = true;
                 index += 1;
-            } else if (index == args.length - 1) {
-                if (Files.exists(Path.of(args[index]))) {
-                    rootFilePath = Path.of(args[index]);
-                } else {
-                    throw new CommandLineArgumentsException("The file on this path: \"" + args[index] + "\" does not exist or is not available.");
-                }
-                index += 1;
             } else {
-                throw new CommandLineArgumentsException("The option \"" + args[index] + "\" is unknown.");
+                StringBuilder compositePathString = new StringBuilder();
+                compositePathString.append(args[index]);
+                while (index != args.length - 1) {
+                    ++index;
+                    compositePathString.append(" ").append(args[index]);
+                }
+                Path compositePath;
+                try {
+                    compositePath = Path.of(compositePathString.toString());
+                } catch (InvalidPathException error) {
+                    throw new CommandLineArgumentsException("Path " + compositePathString + "is invalid.");
+                }
+                if (Files.exists(compositePath)) {
+                    rootFilePath = compositePath;
+                    break;
+                } else {
+                    throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
+                }
             }
         }
         return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
@@ -84,14 +94,14 @@ public class CommandLineParser {
     public static String showUsage() {
     return """
             Usage:
-            '--limit n' - show maximum n heaviest files in each directory. n - an integer number. Default n is 5
-            '--depth n' - show maximum n levels of depth of a root directory. n - an integer number.
+            '--limit n' - shows maximum n heaviest files in each directory. n - an integer number. Default n is 5
+            '--depth n' - shows maximum n levels of depth of a root directory. n - an integer number.
             Default value for n is 3. Example: root directory: 'D:/'. Imagine you have file with path 'D:/dir1/dir2/dir3/dir4/file'.
             Then you can see a file only if your depth value is 5 or higher. If you depth value is 3 you will see all directories and files until dir3 level.
             If you have 0 depth you will only see size of a root directory without files it contains.
-            '-L' - go throw symbolic links' real path. False by default.
-            The last argument of your command line is your root path. The path can not contain spaces in it's name.
-            Default root path is the path from which you launched the program.
+            '-L' - follows real paths of symbolic links. False by default.
+            The path must be the last thing you print in command line for correct work of the program (you should write it after all options e.g. --limit, --depth, -L).
+            The path may contain any amount of spaces in it.
             """;
     }
 }

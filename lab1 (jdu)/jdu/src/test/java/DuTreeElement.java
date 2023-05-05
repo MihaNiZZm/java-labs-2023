@@ -1,3 +1,4 @@
+import ru.nsu.fit.mihanizzm.jdu.DuTreeBuilder;
 import ru.nsu.fit.mihanizzm.jdu.model.Directory;
 import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
 import ru.nsu.fit.mihanizzm.jdu.model.RegularFile;
@@ -19,7 +20,6 @@ public record DuTreeElement(Type type, String path, List<DuTreeElement> children
     private static DuFile buildTree(DuTreeElement treeElement, Path parentPath) {
         Path currentPath = parentPath.resolve(treeElement.path);
         long size;
-        String name = currentPath.getFileName().toString();
 
         if (treeElement.type == Type.FILE) {
             try {
@@ -28,7 +28,7 @@ public record DuTreeElement(Type type, String path, List<DuTreeElement> children
             catch (IOException error) {
                 size = 0;
             }
-            return new RegularFile(currentPath, size, name);
+            return new RegularFile(currentPath, size);
         } else if (treeElement.type == Type.SYM) {
             size = 0;
             Path realPath;
@@ -38,11 +38,14 @@ public record DuTreeElement(Type type, String path, List<DuTreeElement> children
             catch (IOException error) {
                 realPath = null;
             }
-            return new SymLink(currentPath, size, name, realPath);
+
+            DuFile realFile = DuTreeBuilder.resolveSymLink(realPath);
+
+            return new SymLink(currentPath, size, realPath, realFile);
         } else if (treeElement.type == Type.DIR) {
             size = treeElement.getDirSize(currentPath);
             List<DuFile> children = treeElement.children.stream().map(c -> buildTree(c, currentPath)).toList();
-            return new Directory(currentPath, size, name, children);
+            return new Directory(currentPath, size, children);
         }
         else {
             throw new RuntimeException("Unknown file type.");

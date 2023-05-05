@@ -9,21 +9,24 @@ public class DuPrinter {
     private final CommandLineOptions options;
     private final PrintStream printStream;
     private final HashSet<DuFile> visitedFiles;
+    private final HashSet<DuFile> resolvedVisitedFiles;
     private int currentDepth;
-    private boolean isFromSymLink;
+    private boolean isInSymlink;
 
-    public DuPrinter(CommandLineOptions opts, PrintStream printStream) {
+    private DuPrinter(CommandLineOptions opts, PrintStream printStream) {
         this.options = opts;
         this.printStream = printStream;
 
+        this.resolvedVisitedFiles = new HashSet<>();
         this.visitedFiles = new HashSet<>();
         this.currentDepth = 0;
-        this.isFromSymLink = false;
+        this.isInSymlink = false;
     }
 
-//    public static void print(DuFile root, CommandLineOptions opts, PrintStream printStream) {
-//
-//    }
+    public static void print(DuFile root, CommandLineOptions opts, PrintStream printStream) {
+        DuPrinter printer = new DuPrinter(opts, printStream);
+        printer.getPrintInfo(root, false);
+    }
 
     enum Size {
         KB("KiB", 1024),
@@ -72,26 +75,37 @@ public class DuPrinter {
 
 
      */
-    public void getPrintInfo(DuFile file) {
+    public void getPrintInfo(DuFile file, boolean isResolved) {
         if (printStream == null) {
             throw new PrinterException("Print stream was not set. Can't print to null print stream.");
         }
-        if (currentDepth > options.depth() || !visitedFiles.add(file)) {
-            printStream.append("");
+
+        if (currentDepth > options.depth()) {
             return;
         }
 
+        if (isInSymlink) {
+            if (!resolvedVisitedFiles.add(file)) {
+                return;
+            }
+        } else {
+            if (!visitedFiles.add(file)) {
+                return;
+            }
+        }
+
+
+
         String stringSize = file.hasUnknownSize() ? "unknown" : Size.convert(file.getSize());
-        printStream.append("\t".repeat(currentDepth));
 
         switch (file) {
             case RegularFile regularFile -> {
-                if (isFromSymLink) {
+                printStream.append("\t".repeat(currentDepth));
+                if (isResolved) {
                     printStream.append("Followed symlink: ");
-                    isFromSymLink = false;
                 }
 
-                printStream.append(regularFile.getName()).append(" [").append(stringSize).append("]");
+                printStream.append(regularFile.getPath().getFileName().toString()).append(" [").append(stringSize).append("]");
                 if (stringSize.equals("unknown")) {
                     printStream.append(" (file has unknown size)");
                 }
@@ -99,38 +113,41 @@ public class DuPrinter {
             }
             case SymLink symLink -> {
                 if (options.isCheckingSymLinks()) {
-                    isFromSymLink = true;
-                    getPrintInfo(DuTreeBuilder.resolveSymLink(symLink));
+
+                    isInSymlink = true;
+                    getPrintInfo(symLink.getRealFile(), true);
+                    isInSymlink = false;
                 }
                 else {
-                    printStream.append("Unfollowed symlink: ").append(symLink.getName()).append(" [").append(stringSize).append("]\n");
+                    printStream.append("\t".repeat(currentDepth));
+                    printStream.append("Unfollowed symlink: ").append(symLink.getPath().getFileName().toString()).append(" [").append(stringSize).append("]\n");
                 }
             }
             case Directory directory -> {
-                if (isFromSymLink) {
+                printStream.append("\t".repeat(currentDepth));
+                if (isResolved) {
                     printStream.append("Followed symlink: ");
-                    isFromSymLink = false;
                 }
 
-                printStream.append(directory.getName()).append(" [").append(stringSize).append("]\n");
+                printStream.append(directory.getPath().getFileName().toString()).append(" [").append(stringSize).append("]\n");
 
-                if (directory.getChildren() == null) {
+                if (directory.getChildren() == null || directory.getChildren().size() == 0) {
                     return;
                 }
 
                 ++currentDepth;
                 for (DuFile child: DuTreeBuilder.getLimitedNumberOfChildrenFiles(directory, options.limit())) {
-                    getPrintInfo(child);
+                    getPrintInfo(child, false);
                 }
                 --currentDepth;
             }
             case UnknownFile unknownFile -> {
-                if (isFromSymLink) {
+                printStream.append("\t".repeat(currentDepth));
+                if (isResolved) {
                     printStream.append("Followed symlink: ");
-                    isFromSymLink = false;
                 }
 
-                printStream.append(unknownFile.getName()).append(" [").append(stringSize).append("]").append(" (file is unknown)\n");
+                printStream.append(unknownFile.getPath().toString()).append(" [").append(stringSize).append("]").append(" (file is unknown)\n");
             }
         }
     }

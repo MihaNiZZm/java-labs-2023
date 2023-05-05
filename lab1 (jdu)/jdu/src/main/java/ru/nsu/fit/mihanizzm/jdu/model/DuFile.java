@@ -5,7 +5,6 @@ import java.nio.file.Path;
 public abstract sealed class DuFile permits Directory, RegularFile, SymLink, UnknownFile {
     private final Path path;
     private final long size;
-    private final String name;
 
     public boolean hasUnknownSize() {
         return size == -1;
@@ -15,10 +14,6 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
         return this.size;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
     public Path getPath() { return this.path; }
 
     @Override
@@ -26,7 +21,6 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
         int result = 0;
         result += 31 * path.toString().hashCode();
         result += 31 * size;
-        result += 31 * name.hashCode();
         return result;
     }
 
@@ -43,10 +37,9 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
                (this.path.equals(((DuFile) obj).path));
     }
 
-    protected DuFile(Path path, long size, String name) {
+    protected DuFile(Path path, long size) {
         this.path = path;
         this.size = size;
-        this.name = name;
     }
 
     @Override
@@ -57,9 +50,6 @@ public abstract sealed class DuFile permits Directory, RegularFile, SymLink, Unk
                 "\n" +
                 "File path: " +
                 this.path +
-                "\n" +
-                "File name: " +
-                this.name +
                 "\n\n";
     }
 }

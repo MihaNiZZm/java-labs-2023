@@ -10,8 +10,8 @@ public final class Directory extends DuFile {
         return children;
     }
 
-    public Directory(Path path, long size, String name, List<DuFile> newChildren) {
-        super(path, size, name);
+    public Directory(Path path, long size, List<DuFile> newChildren) {
+        super(path, size);
         children = newChildren;
     }
 
@@ -23,9 +23,6 @@ public final class Directory extends DuFile {
                 "\n" +
                 "File path: " +
                 this.getPath() +
-                "\n" +
-                "File name: " +
-                this.getName() +
                 "\n" +
                 "Children files: " +
                 this.children +

@@ -11,23 +11,10 @@ import java.nio.file.Path;
 
 public class DuTreeBuilderTest extends DuTest {
 
-    /*
-
-    CR:
-    - regular file
-    - symlink
-    - directory with regular file
-    - empty directory
-    - directory with symlink
-    - directory with another dir
-    - recursive symlink
-    - unknown file?
-
-     */
-
     @Test
     public void testOneFileInDirectory() throws IOException {
         FileSystem fs = fileSystem();
+
         Path fooPath = fs.getPath("foo");
         Files.createDirectory(fooPath);
         Path barPath = fooPath.resolve("bar.txt");
@@ -44,6 +31,7 @@ public class DuTreeBuilderTest extends DuTest {
     @Test
     public void testManyFilesInDirectory() throws IOException {
         FileSystem fs = fileSystem();
+
         Path fooPath = fs.getPath("foo");
         Files.createDirectory(fooPath);
         Path barPath = fooPath.resolve("bar.txt");
@@ -74,6 +62,7 @@ public class DuTreeBuilderTest extends DuTest {
     @Test
     public void testDirectoryInDirectoryInDirectory() throws IOException {
         FileSystem fs = fileSystem();
+
         Path fooPath = fs.getPath("foo");
         Files.createDirectory(fooPath);
         Path barPath = fooPath.resolve("bar");
@@ -90,7 +79,7 @@ public class DuTreeBuilderTest extends DuTest {
     }
 
     @Test
-    public void testSymLink() throws IOException {
+    public void testSymlinkInDirectory() throws IOException {
         FileSystem fs = fileSystem();
 
         Path fooPath = fs.getPath("foo");
@@ -124,4 +113,64 @@ public class DuTreeBuilderTest extends DuTest {
 
         TestCase.assertEquals(expected, actual);
     }
+
+    @Test
+    public void testEmptyDirectory() throws IOException {
+        FileSystem fs = fileSystem();
+
+        Path dirPath = fs.getPath("dir");
+        Files.createDirectory(dirPath);
+
+        CommandLineOptions opts = new CommandLineOptions(dirPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("dir"));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSymLink() throws IOException {
+        FileSystem fs = fileSystem();
+
+
+        Path linkedFilePath = fs.getPath("file");
+        Files.createFile(linkedFilePath);
+
+        Path linkPath = fs.getPath("link");
+        Files.createLink(linkPath, linkedFilePath);
+
+        CommandLineOptions opts = new CommandLineOptions(linkPath, 3, 5, false);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("link"));
+
+        TestCase.assertEquals(expected, actual);
+    }
+
+//    @Test
+//    public void testRecursiveSymlink() throws IOException {
+//        FileSystem fs = fileSystem();
+//
+//
+//        Path linkPath1 = fs.getPath("link1");
+//        Path linkPath2 = fs.getPath("link2");
+//
+//        Files.createLink(linkPath2, linkPath1);
+//        Files.createLink(linkPath1, linkPath2);
+//
+//
+//        CommandLineOptions opts = new CommandLineOptions(linkPath1, 3, 5, false);
+//
+//        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+//        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("link1"));
+//
+//        TestCase.assertEquals(expected, actual);
+//    }
+
+     /*
+    CR
+    - recursive symlink // impossible in used file system.
+    - unknown file //impossible too
+     */
 }
