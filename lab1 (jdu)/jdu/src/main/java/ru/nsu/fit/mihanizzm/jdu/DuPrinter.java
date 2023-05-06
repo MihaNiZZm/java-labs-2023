@@ -6,11 +6,11 @@ import java.io.PrintStream;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DuPrinter {
     private final CommandLineOptions options;
     private final PrintStream printStream;
-    // CR: do we really need two?
     private final HashSet<DuFile> visitedFiles;
     private final HashSet<DuFile> resolvedVisitedFiles;
     private int currentDepth;
@@ -32,10 +32,11 @@ public class DuPrinter {
     }
 
     public static List<DuFile> getLimitedNumberOfChildrenFiles(Directory dir, int limit) {
-        // CR: stream
-        List<DuFile> unsortedChildren = dir.getChildren();
-        unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
-        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
+        return dir.getChildren()
+                .stream()
+                .sorted(Comparator.comparingLong(DuFile::getSize).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 
     enum Size {
@@ -65,26 +66,6 @@ public class DuPrinter {
         }
     }
 
-    /*
-
-
-   CR:
-
-    foo
-      slink1 -> bar
-
-    bar
-      slink2 -> foo
-
-    depth = 5
-
-    foo
-      slink1 -> bar
-        bar
-          slink2 -> foo
-
-
-     */
     public void getPrintInfo(DuFile file, boolean isResolved) {
         if (printStream == null) {
             throw new PrinterException("Print stream was not set. Can't print to null print stream.");

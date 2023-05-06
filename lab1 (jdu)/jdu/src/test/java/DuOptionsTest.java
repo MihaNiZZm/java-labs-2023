@@ -4,6 +4,8 @@ import ru.nsu.fit.mihanizzm.jdu.CommandLineArgumentsException;
 import ru.nsu.fit.mihanizzm.jdu.CommandLineOptions;
 import ru.nsu.fit.mihanizzm.jdu.CommandLineParser;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DuOptionsTest extends DuTest {
@@ -38,11 +40,14 @@ public class DuOptionsTest extends DuTest {
     }
 
     @Test
-    public void testCustomPath() {
-        String[] args = { "D:/Photos" };
+    public void testCustomPath() throws IOException {
+        Path customPath = Files.createTempFile("custom_file", null);
+        String[] args = { customPath.toString() };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos"), 5, 3, false);
+        CommandLineOptions expected = new CommandLineOptions(customPath, 5, 3, false);
+
+        Files.delete(customPath);
 
         TestCase.assertEquals(expected, actual);
     }
@@ -58,52 +63,57 @@ public class DuOptionsTest extends DuTest {
     }
 
     @Test
-    public void testAllCustomOptions() {
-        // CR: create tmp file instead and provide its path
-        String[] args = { "--limit", "1", "--depth", "1", "-L", "D:/Photos" };
+    public void testAllCustomOptions() throws IOException {
+        Path tempPath = Files.createTempFile("another_custom_file", null);
+        String[] args = { "--limit", "1", "--depth", "1", "-L", tempPath.toString()};
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos"), 1, 1, true);
+        CommandLineOptions expected = new CommandLineOptions(tempPath, 1, 1, true);
+
+        Files.delete(tempPath);
 
         TestCase.assertEquals(expected, actual);
     }
 
     @Test
     public void testLinksAndDepth() {
-        String[] args = { "--depth", "1", "-L", "D:/Photos" };
+        String[] args = { "--depth", "1", "-L" };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos"), 5, 1, true);
+        CommandLineOptions expected = new CommandLineOptions(Path.of(System.getProperty("user.dir")), 5, 1, true);
 
         TestCase.assertEquals(expected, actual);
     }
 
     @Test
     public void testLinksAndLimit() {
-        String[] args = { "--limit", "1", "-L", "D:/Photos" };
+        String[] args = { "--limit", "1", "-L" };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos"), 1, 3, true);
+        CommandLineOptions expected = new CommandLineOptions(Path.of(System.getProperty("user.dir")), 1, 3, true);
 
         TestCase.assertEquals(expected, actual);
     }
 
     @Test
     public void testLimitAndDepth() {
-        String[] args = { "--limit", "1", "--depth", "1", "D:/Photos" };
+        String[] args = { "--limit", "1", "--depth", "1" };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos"), 1, 1, false);
+        CommandLineOptions expected = new CommandLineOptions(Path.of(System.getProperty("user.dir")), 1, 1, false);
 
         TestCase.assertEquals(expected, actual);
     }
 
     @Test
-    public void testPathWithSpaces() {
-        String[] args = { "--limit", "1", "--depth", "1", "D:/Photos/After editing" };
+    public void testPathWithSpaces() throws IOException {
+        Path fileWithSpaces = Files.createTempFile("file with spaces in a name", null);
+        String[] args = { "--limit", "1", "--depth", "1", fileWithSpaces.toString() };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);
-        CommandLineOptions expected = new CommandLineOptions(Path.of("D:/Photos/After editing"), 1, 1, false);
+        CommandLineOptions expected = new CommandLineOptions(fileWithSpaces, 1, 1, false);
+
+        Files.delete(fileWithSpaces);
 
         TestCase.assertEquals(expected, actual);
     }
@@ -116,29 +126,34 @@ public class DuOptionsTest extends DuTest {
     }
 
     @Test(expected = CommandLineArgumentsException.class)
-    public void testManyPaths() {
-        String[] args = { "--limit", "1", "--depth", "1", "D:/Photos", "C:/Windows" };
+    public void testManyPaths() throws IOException {
+        Path file1 = Files.createTempFile("temp1", null);
+        Path file2 = Files.createTempFile("temp2", null);
+        String[] args = { "--limit", "1", "--depth", "1", file1.toString(), file2.toString() };
 
         CommandLineParser.getCmdOptions(args);
+
+        Files.delete(file1);
+        Files.delete(file2);
     }
 
     @Test(expected = CommandLineArgumentsException.class)
     public void testNegativeNumberOfArgumentValue() {
-        String[] args = { "--limit", "-1", "--depth", "1", "D:/Photos"};
+        String[] args = { "--limit", "-1", "--depth", "1" };
 
         CommandLineParser.getCmdOptions(args);
     }
 
     @Test(expected = CommandLineArgumentsException.class)
     public void testTooBigNumber() {
-        String[] args = { "--limit", "23894798325348954931", "--depth", "1", "D:/Photos" };
+        String[] args = { "--limit", "23894798325348954931", "--depth", "1" };
 
         CommandLineParser.getCmdOptions(args);
     }
 
     @Test(expected = CommandLineArgumentsException.class)
     public void testUnknownOption() {
-        String[] args = { "--ya_lomal_steklo", "1", "--depth", "1", "D:/Photos" };
+        String[] args = { "--ya_lomal_steklo", "1", "--depth", "1" };
 
         CommandLineParser.getCmdOptions(args);
     }

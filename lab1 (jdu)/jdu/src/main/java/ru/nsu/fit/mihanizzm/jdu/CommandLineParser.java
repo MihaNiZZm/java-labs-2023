@@ -10,12 +10,10 @@ public class CommandLineParser {
     private static final int DEFAULT_LIMIT = 5;
     private static final boolean NOT_CHECKING = false;
 
-    // CR: rename
-    private static int parseValue(String[] args, int index) {
+    private static int parseOptionNumericValue(String[] args, int index) {
         int argValue;
         try {
-            // CR: Integer.parseUnsignedInt?
-            argValue = Integer.parseInt(args[index + 1]);
+            argValue = Integer.parseUnsignedInt(args[index + 1]);
         }
         catch (NumberFormatException error) {
             throw new CommandLineArgumentsException("Could not parse value of a \"" + args[index] + "\" option. Error message: \"" + error.getMessage() + "\"");
@@ -26,13 +24,12 @@ public class CommandLineParser {
         return argValue;
     }
 
-    // CR: rename
-    private static int getArgValue(int index, String[] args) throws CommandLineArgumentsException {
+    private static int getNumericValueForOption(int index, String[] args) throws CommandLineArgumentsException {
         int argValue;
         if (index + 1 >= args.length) {
             throw new CommandLineArgumentsException("The option \"" + args[index] + "\" is the last argument but this option requires an integer value after it.");
         }
-        argValue = parseValue(args, index);
+        argValue = parseOptionNumericValue(args, index);
         return argValue;
     }
 
@@ -63,11 +60,11 @@ public class CommandLineParser {
         while (index != args.length) {
             switch (args[index]) {
                 case "--depth" -> {
-                    depth = getArgValue(index, args);
+                    depth = getNumericValueForOption(index, args);
                     index += 2;
                 }
                 case "--limit" -> {
-                    limit = getArgValue(index, args);
+                    limit = getNumericValueForOption(index, args);
                     index += 2;
                 }
                 case "-L" -> {
@@ -84,11 +81,13 @@ public class CommandLineParser {
                     Path compositePath;
                     try {
                         compositePath = Path.of(compositePathString.toString());
-                    } catch (InvalidPathException error) {
+                    }
+                    catch (InvalidPathException error) {
                         throw new CommandLineArgumentsException("Path " + compositePathString + "is invalid.");
                     }
                     if (Files.exists(compositePath)) {
                         rootFilePath = compositePath;
+                        return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
                     } else {
                         throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
                     }

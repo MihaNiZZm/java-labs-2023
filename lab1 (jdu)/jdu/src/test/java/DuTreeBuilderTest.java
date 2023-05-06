@@ -148,29 +148,21 @@ public class DuTreeBuilderTest extends DuTest {
         TestCase.assertEquals(expected, actual);
     }
 
-//    @Test
-//    public void testRecursiveSymlink() throws IOException {
-//        FileSystem fs = fileSystem();
-//
-//
-//        Path linkPath1 = fs.getPath("link1");
-//        Path linkPath2 = fs.getPath("link2");
-//
-//        Files.createLink(linkPath2, linkPath1);
-//        Files.createLink(linkPath1, linkPath2);
-//
-//
-//        CommandLineOptions opts = new CommandLineOptions(linkPath1, 3, 5, false);
-//
-//        DuFile actual = DuTreeBuilder.buildFileTree(opts);
-//        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("link1"));
-//
-//        TestCase.assertEquals(expected, actual);
-//    }
+    @Test
+    public void testRecursiveSymlink() throws IOException {
+        FileSystem fs = fileSystem();
 
-     /*
-    CR
-    - recursive symlink // impossible in used file system.
-    - it is possible, other students have this test...
-     */
+        Path link1Path = fs.getPath("link1");
+        Files.createSymbolicLink(link1Path, link1Path);
+
+        Path link2Path = fs.getPath("link2");
+        Files.createSymbolicLink(link2Path, link1Path);
+
+        CommandLineOptions opts = new CommandLineOptions(link2Path, 3, 5, true);
+
+        DuFile actual = DuTreeBuilder.buildFileTree(opts);
+        DuFile expected = DuTreeElement.tree(fs, DuTreeElement.file("link2"));
+
+        TestCase.assertEquals(expected, actual);
+    }
 }
