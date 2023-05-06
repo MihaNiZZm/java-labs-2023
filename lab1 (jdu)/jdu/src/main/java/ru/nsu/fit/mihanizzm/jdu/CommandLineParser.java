@@ -60,6 +60,7 @@ public class CommandLineParser {
             return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
         }
 
+        label:
         while (index != args.length) {
             switch (args[index]) {
                 case "--depth" -> {
@@ -89,6 +90,7 @@ public class CommandLineParser {
                     }
                     if (Files.exists(compositePath)) {
                         rootFilePath = compositePath;
+                        break label;
                     } else {
                         throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
                     }
