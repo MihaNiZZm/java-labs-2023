@@ -59,6 +59,7 @@ public class DuOptionsTest extends DuTest {
 
     @Test
     public void testAllCustomOptions() {
+        // CR: create tmp file instead and provide its path
         String[] args = { "--limit", "1", "--depth", "1", "-L", "D:/Photos" };
 
         CommandLineOptions actual = CommandLineParser.getCmdOptions(args);

@@ -7,10 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-// CR: javadoc
 /*
 * This class does common operations with {@link DuFile} objects such as:
         * <ul>
@@ -84,6 +82,7 @@ public class DuTreeBuilder {
     private static final int UNKNOWN_FILE_SIZE = -1;
     // CR: find out how to find size
     // Ne poluchaestya
+    // CR:  Files.getFileAttributeView(Path.of(...), BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).readAttributes().size()
     private static final int DEFAULT_SYMLINK_SIZE = 0;
 
     private static Directory getNewDirectory(Path rootPath) {
@@ -153,7 +152,7 @@ public class DuTreeBuilder {
         List<DuFile> children = new ArrayList<>();
         List<Path> childrenList;
         try {
-            // CR: close list
+            // CR: close list using try catch with resources
             childrenList = Files.list(dirPath).toList();
             Files.list(dirPath).close();
         }
@@ -193,9 +192,4 @@ public class DuTreeBuilder {
         }
     }
 
-    public static List<DuFile> getLimitedNumberOfChildrenFiles(Directory dir, int limit) {
-        List<DuFile> unsortedChildren = dir.getChildren();
-        unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
-        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
-    }
 }

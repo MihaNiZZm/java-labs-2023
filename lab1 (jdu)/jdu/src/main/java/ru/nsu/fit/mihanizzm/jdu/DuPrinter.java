@@ -3,11 +3,14 @@ package ru.nsu.fit.mihanizzm.jdu;
 import ru.nsu.fit.mihanizzm.jdu.model.*;
 
 import java.io.PrintStream;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 
 public class DuPrinter {
     private final CommandLineOptions options;
     private final PrintStream printStream;
+    // CR: do we really need two?
     private final HashSet<DuFile> visitedFiles;
     private final HashSet<DuFile> resolvedVisitedFiles;
     private int currentDepth;
@@ -26,6 +29,13 @@ public class DuPrinter {
     public static void print(DuFile root, CommandLineOptions opts, PrintStream printStream) {
         DuPrinter printer = new DuPrinter(opts, printStream);
         printer.getPrintInfo(root, false);
+    }
+
+    public static List<DuFile> getLimitedNumberOfChildrenFiles(Directory dir, int limit) {
+        // CR: stream
+        List<DuFile> unsortedChildren = dir.getChildren();
+        unsortedChildren.sort(Comparator.comparingLong(DuFile::getSize).reversed());
+        return unsortedChildren.subList(0, Math.min(limit, unsortedChildren.size()));
     }
 
     enum Size {
@@ -136,7 +146,7 @@ public class DuPrinter {
                 }
 
                 ++currentDepth;
-                for (DuFile child: DuTreeBuilder.getLimitedNumberOfChildrenFiles(directory, options.limit())) {
+                for (DuFile child: getLimitedNumberOfChildrenFiles(directory, options.limit())) {
                     getPrintInfo(child, false);
                 }
                 --currentDepth;

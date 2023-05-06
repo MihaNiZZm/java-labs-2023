@@ -3,6 +3,8 @@ package ru.nsu.fit.mihanizzm.jdu;
 import java.nio.file.Path;
 
 public record CommandLineOptions(Path rootPath, int limit, int depth, boolean isCheckingSymLinks) {
+    // CR: why not use default implementation?
+    // CR: also you must always define equals + hashCode together
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

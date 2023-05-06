@@ -171,6 +171,6 @@ public class DuTreeBuilderTest extends DuTest {
      /*
     CR
     - recursive symlink // impossible in used file system.
-    - unknown file //impossible too
+    - it is possible, other students have this test...
      */
 }

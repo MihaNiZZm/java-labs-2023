@@ -10,9 +10,11 @@ public class CommandLineParser {
     private static final int DEFAULT_LIMIT = 5;
     private static final boolean NOT_CHECKING = false;
 
+    // CR: rename
     private static int parseValue(String[] args, int index) {
         int argValue;
         try {
+            // CR: Integer.parseUnsignedInt?
             argValue = Integer.parseInt(args[index + 1]);
         }
         catch (NumberFormatException error) {
@@ -24,6 +26,7 @@ public class CommandLineParser {
         return argValue;
     }
 
+    // CR: rename
     private static int getArgValue(int index, String[] args) throws CommandLineArgumentsException {
         int argValue;
         if (index + 1 >= args.length) {
@@ -58,33 +61,37 @@ public class CommandLineParser {
         }
 
         while (index != args.length) {
-            if (args[index].equals("--depth")) {
-                depth = getArgValue(index, args);
-                index += 2;
-            } else if (args[index].equals("--limit")) {
-                limit = getArgValue(index, args);
-                index += 2;
-            } else if (args[index].equals("-L")) {
-                isCheckingSymLinks = true;
-                index += 1;
-            } else {
-                StringBuilder compositePathString = new StringBuilder();
-                compositePathString.append(args[index]);
-                while (index != args.length - 1) {
-                    ++index;
-                    compositePathString.append(" ").append(args[index]);
+            switch (args[index]) {
+                case "--depth" -> {
+                    depth = getArgValue(index, args);
+                    index += 2;
                 }
-                Path compositePath;
-                try {
-                    compositePath = Path.of(compositePathString.toString());
-                } catch (InvalidPathException error) {
-                    throw new CommandLineArgumentsException("Path " + compositePathString + "is invalid.");
+                case "--limit" -> {
+                    limit = getArgValue(index, args);
+                    index += 2;
                 }
-                if (Files.exists(compositePath)) {
-                    rootFilePath = compositePath;
-                    break;
-                } else {
-                    throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
+                case "-L" -> {
+                    isCheckingSymLinks = true;
+                    index += 1;
+                }
+                default -> {
+                    StringBuilder compositePathString = new StringBuilder();
+                    compositePathString.append(args[index]);
+                    while (index != args.length - 1) {
+                        ++index;
+                        compositePathString.append(" ").append(args[index]);
+                    }
+                    Path compositePath;
+                    try {
+                        compositePath = Path.of(compositePathString.toString());
+                    } catch (InvalidPathException error) {
+                        throw new CommandLineArgumentsException("Path " + compositePathString + "is invalid.");
+                    }
+                    if (Files.exists(compositePath)) {
+                        rootFilePath = compositePath;
+                    } else {
+                        throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
+                    }
                 }
             }
         }
