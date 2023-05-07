@@ -3,6 +3,9 @@ package ru.nsu.fit.mihanizzm.jdu;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CommandLineParser {
     private static final Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));
@@ -72,25 +75,18 @@ public class CommandLineParser {
                     index += 1;
                 }
                 default -> {
-                    StringBuilder compositePathString = new StringBuilder();
-                    compositePathString.append(args[index]);
-                    while (index != args.length - 1) {
-                        ++index;
-                        compositePathString.append(" ").append(args[index]);
-                    }
-                    Path compositePath;
+                    String pathString = Arrays.stream(args, index, args.length)
+                            .collect(Collectors.joining(" "));
+                    Path path;
                     try {
-                        compositePath = Path.of(compositePathString.toString());
+                        path = Path.of(pathString);
+                    } catch (InvalidPathException pathException) {
+                        throw new CommandLineArgumentsException("Path " + pathString + "is invalid.");
                     }
-                    catch (InvalidPathException error) {
-                        throw new CommandLineArgumentsException("Path " + compositePathString + "is invalid.");
+                    if (!Files.exists(path)) {
+                        throw new CommandLineArgumentsException("Path " + pathString + " doesn't exist or it's an unknown command line argument.");
                     }
-                    if (Files.exists(compositePath)) {
-                        rootFilePath = compositePath;
-                        return new CommandLineOptions(rootFilePath, limit, depth, isCheckingSymLinks);
-                    } else {
-                        throw new CommandLineArgumentsException("Path " + compositePathString + " doesn't exist or it's an unknown command line argument.");
-                    }
+                    return new CommandLineOptions(path, limit, depth, isCheckingSymLinks);
                 }
             }
         }
