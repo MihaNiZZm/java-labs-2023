@@ -1,5 +1,6 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.exception.TreeBuilderException;
 import ru.nsu.fit.mihanizzm.jdu.model.*;
 
 import java.io.IOException;

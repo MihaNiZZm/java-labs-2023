@@ -1,6 +1,6 @@
 import junit.framework.TestCase;
 import org.junit.Test;
-import ru.nsu.fit.mihanizzm.jdu.CommandLineArgumentsException;
+import ru.nsu.fit.mihanizzm.jdu.exception.CommandLineArgumentsException;
 import ru.nsu.fit.mihanizzm.jdu.CommandLineOptions;
 import ru.nsu.fit.mihanizzm.jdu.CommandLineParser;
 

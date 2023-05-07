@@ -1,11 +1,12 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.exception.CommandLineArgumentsException;
+
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CommandLineParser {
     private static final Path DEFAULT_ROOT_PATH = Path.of(System.getProperty("user.dir"));

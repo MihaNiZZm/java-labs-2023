@@ -1,5 +1,7 @@
 package ru.nsu.fit.mihanizzm.jdu;
 
+import ru.nsu.fit.mihanizzm.jdu.exception.CommandLineArgumentsException;
+import ru.nsu.fit.mihanizzm.jdu.exception.DuException;
 import ru.nsu.fit.mihanizzm.jdu.model.DuFile;
 
 public class JDU {
