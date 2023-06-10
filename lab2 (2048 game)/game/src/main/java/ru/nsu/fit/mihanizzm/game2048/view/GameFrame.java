@@ -1,7 +1,5 @@
 package ru.nsu.fit.mihanizzm.game2048.view;
 
-import com.sun.tools.javac.Main;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyListener;
@@ -9,27 +7,15 @@ import java.io.File;
 import java.io.IOException;
 
 public class GameFrame extends JFrame implements GameView {
-    private final Color BG_COLOR = new Color(238, 238, 238);
-    private final Dimension WINDOW_SIZE = new Dimension(768, 966);
-    private KeyListener listener = null;
-    private MainGamePanel mainGamePanel;
-    private int axisSize;
-
-    public void setListener(KeyListener listener) {
-        this.listener = listener;
-    }
 
     public GameFrame(int axisSize) {
-        this.axisSize = axisSize;
         setDefaultFrameParameters();
         registerFont();
         setMenuBar();
 
-        mainGamePanel = new MainGamePanel(this.axisSize);
-        mainGamePanel.setLayout(null);
-        mainGamePanel.setPreferredSize(new Dimension(768, 966));
+        ViewPanel viewPanel = new ViewPanel(axisSize);
 
-        add(mainGamePanel);
+        add(viewPanel);
 
         pack();
         setLocationRelativeTo(null);
@@ -39,7 +25,7 @@ public class GameFrame extends JFrame implements GameView {
     private void setDefaultFrameParameters() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("2048 Pro");
-        ImageIcon image = new ImageIcon("D:\\NSU\\course_2\\object_oriented_programming\\java-labs-2023\\lab2 (2048 game)\\game\\src\\main\\resources\\game_logo.png");
+        ImageIcon image = new ImageIcon("D:/NSU/course_2/object_oriented_programming/java-labs-2023/lab2 (2048 game)/game/src/main/resources/game_logo.png");
         setIconImage(image.getImage());
         setResizable(false);
 
@@ -84,13 +70,11 @@ public class GameFrame extends JFrame implements GameView {
 
     @Override
     public void start(Integer[][] field) {
-        this.mainGamePanel.updateGame(field, "0", "0:00");
         this.repaint();
     }
 
     @Override
     public void update(Integer[][] field, int score, String time) {
-        this.mainGamePanel.updateGame(field, Integer.toString(score), time);
         this.repaint();
     }
 
@@ -101,6 +85,11 @@ public class GameFrame extends JFrame implements GameView {
 
     @Override
     public void endWon() {
+
+    }
+
+    @Override
+    public void setListener(KeyListener listener) {
 
     }
 }
