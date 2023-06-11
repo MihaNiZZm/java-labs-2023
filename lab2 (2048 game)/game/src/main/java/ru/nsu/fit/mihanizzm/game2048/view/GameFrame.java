@@ -1,21 +1,22 @@
 package ru.nsu.fit.mihanizzm.game2048.view;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.IOException;
+import ru.nsu.fit.mihanizzm.game2048.presenter.GamePresenter;
 
-public class GameFrame extends JFrame implements GameView {
+import javax.swing.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+public class GameFrame extends JFrame implements GameView, KeyListener {
+    private final ViewPanel gamePanel;
+    private GamePresenter gamePresenter;
 
     public GameFrame(int axisSize) {
         setDefaultFrameParameters();
-        registerFont();
         setMenuBar();
+        addKeyListener(this);
 
-        ViewPanel viewPanel = new ViewPanel(axisSize);
-
-        add(viewPanel);
+        gamePanel = new ViewPanel(axisSize);
+        add(gamePanel);
 
         pack();
         setLocationRelativeTo(null);
@@ -57,24 +58,17 @@ public class GameFrame extends JFrame implements GameView {
         this.setJMenuBar(newMenu);
     }
 
-    private void registerFont() {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File("D:\\NSU\\course_2\\object_oriented_programming\\java-labs-2023\\lab2 (2048 game)\\game\\src\\main\\resources\\fonts\\ClearSans\\ClearSans-Bold.ttf"));
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("D:\\NSU\\course_2\\object_oriented_programming\\java-labs-2023\\lab2 (2048 game)\\game\\src\\main\\resources\\fonts\\ClearSans\\ClearSans-Bold.ttf")));
-        }
-        catch (IOException | FontFormatException ignored) {
-
-        }
-    }
-
     @Override
     public void start(Integer[][] field) {
+        gamePanel.setBoard(field);
+        gamePanel.setScore(0);
         this.repaint();
     }
 
     @Override
-    public void update(Integer[][] field, int score, String time) {
+    public void update(Integer[][] field, int score) {
+        gamePanel.setBoard(field);
+        gamePanel.setScore(score);
         this.repaint();
     }
 
@@ -89,7 +83,23 @@ public class GameFrame extends JFrame implements GameView {
     }
 
     @Override
-    public void setListener(KeyListener listener) {
+    public void attachPresenter(GamePresenter presenter) {
+        gamePresenter = presenter;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        gamePresenter.handleKeyPressed(keyCode);
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
 
     }
 }

@@ -10,31 +10,14 @@ public class GameField {
     private final Integer axisSize;
     private Integer score;
     private FieldListener listener;
-    private Stopwatch time;
     private boolean has2048 = false;
 
     public Integer[][] getGameField() {
         return gameField;
     }
 
-    public void initTimer(ActionListener listener) {
-        this.time = new Stopwatch(listener);
-    }
-
-    public void startTime() {
-        time.start();
-    }
-
-    public void stopTimer() {
-        time.stop();
-    }
-
-    public void resetTimer() {
-        time.reset();
-    }
 
     public GameField(int axisSize) {
-        this.time = null;
         this.axisSize = axisSize;
         this.gameField = new Integer[axisSize][axisSize];
         for (int i = 0; i < gameField.length; ++i) {
@@ -367,10 +350,6 @@ public class GameField {
 
     public int getScore() {
         return this.score;
-    }
-
-    public String getTime() {
-        return this.time.totalTimeString;
     }
 
     public enum Direction {

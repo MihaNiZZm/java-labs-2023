@@ -17,7 +17,7 @@ public class ViewPanel extends JPanel {
     private final int gapSize;
     private final int boxSize;
 
-    private int[][] board;
+    private Integer[][] board;
     private int score;
 
     public ViewPanel(int boardSize) {
@@ -27,7 +27,7 @@ public class ViewPanel extends JPanel {
         setPreferredSize(new Dimension(768, 966));
         setBackground(new Color(238, 238, 238));
 
-        board = new int[boardSize][boardSize];
+        board = new Integer[boardSize][boardSize];
 
         score = 0;
     }
@@ -47,7 +47,7 @@ public class ViewPanel extends JPanel {
         // Отрисовка игрового поля
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                int value = board[row][col];
+                int value = board[row][col] == null ? 0 : board[row][col];
                 drawTile(g, value, FIELD_STARTING_X_COORDINATE + col * (boxSize + gapSize), FIELD_STARTING_Y_COORDINATE + row * (boxSize + gapSize));
             }
         }
@@ -152,7 +152,7 @@ public class ViewPanel extends JPanel {
         return (ViewPanel.FIELD_PIXEL_SIZE - gapSize * (boardSize - 1)) / boardSize;
     }
 
-    public void setBoard(int[][] board) {
+    public void setBoard(Integer[][] board) {
         this.board = board;
     }
 
