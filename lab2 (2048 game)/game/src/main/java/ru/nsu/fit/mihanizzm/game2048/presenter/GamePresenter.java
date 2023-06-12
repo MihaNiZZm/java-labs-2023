@@ -15,10 +15,11 @@ public class GamePresenter implements FieldListener, Runnable {
 
     public void handleKeyPressed(int keyCode) {
         switch (keyCode) {
-            case KeyEvent.VK_LEFT, KeyEvent.VK_A -> field.move(GameField.Direction.LEFT);
-            case KeyEvent.VK_RIGHT, KeyEvent.VK_D -> field.move(GameField.Direction.RIGHT);
-            case KeyEvent.VK_DOWN, KeyEvent.VK_S -> field.move(GameField.Direction.DOWN);
-            case KeyEvent.VK_UP, KeyEvent.VK_W -> field.move(GameField.Direction.UP);
+            case KeyEvent.VK_LEFT, KeyEvent.VK_A, KeyEvent.VK_L -> field.move(GameField.Direction.LEFT);
+            case KeyEvent.VK_RIGHT, KeyEvent.VK_D, KeyEvent.VK_QUOTE -> field.move(GameField.Direction.RIGHT);
+            case KeyEvent.VK_DOWN, KeyEvent.VK_S, KeyEvent.VK_SEMICOLON -> field.move(GameField.Direction.DOWN);
+            case KeyEvent.VK_UP, KeyEvent.VK_W, KeyEvent.VK_P -> field.move(GameField.Direction.UP);
+            case KeyEvent.VK_R -> newGame();
         }
     }
 
