@@ -1,25 +1,28 @@
 package ru.nsu.fit.mihanizzm.game2048.model;
 
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class GameField {
-    private final Integer[][] gameField;
+    private final int[][] gameField;
     private final Integer axisSize;
     private Integer score;
     private FieldListener listener;
     private boolean has2048 = false;
 
-    public Integer[][] getGameField() {
+    public int[][] getGameField() {
         return gameField;
     }
 
+//   CR:
+//    interface FieldGenerator {
+//        Integer[][] generate(int axisSize);
+//    }
 
     public GameField(int axisSize) {
         this.axisSize = axisSize;
-        this.gameField = new Integer[axisSize][axisSize];
+        this.gameField = new int[axisSize][axisSize];
         for (int i = 0; i < gameField.length; ++i) {
             for (int j = 0; j < gameField.length; ++j) {
                 gameField[i][j] = 0;
@@ -43,21 +46,6 @@ public class GameField {
 
     public void setListener(FieldListener listener) {
         this.listener = listener;
-    }
-
-    public boolean hasEnded() {
-        return hasNoMoreMoves();
-    }
-
-    public void printField() {
-        StringBuilder str = new StringBuilder();
-        for (int i = 0; i < gameField.length; ++i) {
-            for (int j = 0; j < gameField.length; ++j) {
-                str.append(gameField[i][j]).append("\t");
-            }
-            str.append("\n");
-        }
-        System.out.println(str);
     }
 
     private void spawnNewNumber() {
@@ -97,6 +85,7 @@ public class GameField {
     }
 
     private boolean hasNoMoreMoves() {
+        // CR: simplify
         return cantMoveInDirection(Direction.UP) &&
                cantMoveInDirection(Direction.DOWN) &&
                cantMoveInDirection(Direction.LEFT) &&
@@ -130,10 +119,13 @@ public class GameField {
         if (result) {
             spawnNewNumber();
         }
+        // CR: merge booleans
         listener.update(reached2048(), hasNoMoreMoves());
     }
 
+    // CR: merge all moves
     private boolean moveLeft() {
+        // CR: just use boolean flag
         if (cantMoveInDirection(Direction.LEFT)) {
             return false;
         }
@@ -152,6 +144,7 @@ public class GameField {
                         merge(rowIndex, colIndex, numSlot.rowIndex, numSlot.colIndex);
                         numSlot.value = gameField[numSlot.rowIndex][numSlot.colIndex];
                         numSlot.isMerged = true;
+                        // CR: if (!has2048 && numSlot.value == 2048) has2048 = true; (instead of separate pass)
                     } else {
                         moveValue(rowIndex, colIndex, numSlot.rowIndex, numSlot.colIndex + 1);
                         numSlot.setValues(numSlot.rowIndex, numSlot.colIndex + 1, gameField[numSlot.rowIndex][numSlot.colIndex + 1]);

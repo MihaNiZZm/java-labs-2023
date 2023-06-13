@@ -4,15 +4,13 @@ import ru.nsu.fit.mihanizzm.game2048.model.FieldListener;
 import ru.nsu.fit.mihanizzm.game2048.model.GameField;
 import ru.nsu.fit.mihanizzm.game2048.view.GameView;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 public class GamePresenter implements FieldListener, Runnable {
-    GameView view;
-    GameField field;
+    private final GameView view;
+    private final GameField field;
 
+    // CR: pass as part of interface to view
     public void handleKeyPressed(int keyCode) {
         switch (keyCode) {
             case KeyEvent.VK_LEFT, KeyEvent.VK_A, KeyEvent.VK_L -> field.move(GameField.Direction.LEFT);
@@ -36,9 +34,37 @@ public class GamePresenter implements FieldListener, Runnable {
             view.endWon();
         }
         if (hasNoMoves) {
+            // CR: add high scores
             view.endNoMoves();
         }
     }
+
+//    package utils;
+//
+//    static class ScoreManager {
+//
+//        List<Score> scores = new ArrayList<>();
+//
+//        private ScoreManager() {
+//            this.scores = loadScores();
+//        }
+//
+//        record Score(String name, int score) {}
+//
+//        public boolean addHighScore(String name, int score) {
+//
+//        }
+//
+//        private void loadScores() {
+//
+//        }
+//
+//        public void updateScores() {
+//
+//        }
+//
+//
+//    }
 
     @Override
     public void run() {

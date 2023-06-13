@@ -26,6 +26,7 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
     private void setDefaultFrameParameters() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("2048 Pro");
+        // CR: GameFrame.class.getResourceAsStream()
         ImageIcon image = new ImageIcon("D:/NSU/course_2/object_oriented_programming/java-labs-2023/lab2 (2048 game)/game/src/main/resources/game_logo.png");
         setIconImage(image.getImage());
         setResizable(false);
@@ -59,14 +60,14 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
     }
 
     @Override
-    public void start(Integer[][] field) {
+    public void start(int[][] field) {
         gamePanel.setBoard(field);
         gamePanel.setScore(0);
         this.repaint();
     }
 
     @Override
-    public void update(Integer[][] field, int score) {
+    public void update(int[][] field, int score) {
         gamePanel.setBoard(field);
         gamePanel.setScore(score);
         this.repaint();
