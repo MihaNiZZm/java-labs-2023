@@ -1,14 +1,20 @@
 package ru.nsu.fit.mihanizzm.game2048.view;
 
-import ru.nsu.fit.mihanizzm.game2048.presenter.GamePresenter;
+import ru.nsu.fit.mihanizzm.game2048.presenter.Presenter;
+
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.imageio.ImageIO;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.URL;
 
 public class GameFrame extends JFrame implements GameView, KeyListener {
     private final ViewPanel gamePanel;
-    private GamePresenter gamePresenter;
+    private Presenter gamePresenter;
 
     public GameFrame(int axisSize) {
         setDefaultFrameParameters();
@@ -26,12 +32,26 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
     private void setDefaultFrameParameters() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("2048 Pro");
-        // CR: GameFrame.class.getResourceAsStream()
-        ImageIcon image = new ImageIcon("D:/NSU/course_2/object_oriented_programming/java-labs-2023/lab2 (2048 game)/game/src/main/resources/game_logo.png");
-        setIconImage(image.getImage());
-        setResizable(false);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                gamePresenter.updateScores();
+            }
+        });
 
+        try {
+            URL imageURL = GameFrame.class.getResource("/game_logo.png");
+            if (imageURL != null) {
+                ImageIcon image = new ImageIcon(ImageIO.read(imageURL));
+                setIconImage(image.getImage());
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load image: " + e.getMessage());
+        }
+
+        setResizable(false);
     }
+
 
     private void setMenuBar() {
         JMenuBar newMenu = new JMenuBar();
@@ -74,23 +94,52 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
     }
 
     @Override
-    public void endNoMoves() {
-
+    public void endNoMoves(String timeElapsed, int score, boolean needToAddScore) {
+        String[] responses = { "Restart [R]", "Cancel" };
+        if (needToAddScore) {
+            String name = JOptionPane.showInputDialog("Congratulations! You got a high score! Type your name here:");
+            gamePresenter.registerNewScore(name, score);
+        }
+        String messageString = "You have no more moves! You have played for: " + timeElapsed + " and got " + score + " score points.";
+        if (JOptionPane.showOptionDialog(
+                null,
+                messageString,
+                "GAME OVER!",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                responses,
+                0) == 0) {
+            gamePresenter.restartGame();
+        }
     }
 
     @Override
-    public void endWon() {
+    public void endWon(String timeElapsed) {
+        String[] responses = { "Continue", "New Game [R]" };
+        String messageString = "You won! It took you " + timeElapsed + " time to reach \"2048\" tile.";
 
+        if (JOptionPane.showOptionDialog(
+                null,
+                messageString,
+                "CONGRATULATIONS!",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                responses,
+                0) == 1) {
+            gamePresenter.restartGame();
+        }
     }
 
     @Override
-    public void attachPresenter(GamePresenter presenter) {
+    public void attachPresenter(Presenter presenter) {
         gamePresenter = presenter;
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        // not used
     }
 
     @Override
@@ -101,6 +150,6 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        // not used
     }
 }
