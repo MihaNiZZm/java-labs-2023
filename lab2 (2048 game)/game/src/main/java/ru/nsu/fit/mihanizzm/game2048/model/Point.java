@@ -13,7 +13,7 @@ public class Point {
         this.isMerged = merged;
     }
 
-    Point(int row, int col) {
+    public Point(int row, int col) {
         this(row, col, 0, false);
     }
 

@@ -5,22 +5,33 @@ import java.util.List;
 import java.util.Random;
 
 public class GameField implements FieldManager {
+    private FieldManager fieldManager;
     private final int[][] gameField;
-    private Integer score;
+    private Integer score = 0;
     private FieldListener listener;
     private boolean has2048 = false;
+    private boolean reached2048 = false;
+
+    public boolean alreadyWon() {
+        return reached2048;
+    }
+
+    public void setFieldManager(FieldManager fm) {
+        this.fieldManager = fm;
+    }
 
     public int[][] getGameField() {
         return gameField;
     }
 
     public GameField(int axisSize) {
+        this.fieldManager = this;
         this.gameField = new int[axisSize][axisSize];
-        generateField(gameField);
+        fieldManager.generateField(gameField, null);
     }
 
     public void clear() {
-        clearField(gameField);
+        fieldManager.clearField(gameField);
         this.score = 0;
     }
 
@@ -29,9 +40,24 @@ public class GameField implements FieldManager {
     }
 
     private void merge(int srcRowIndex, int srcColIndex, int dstRowIndex, int dstColIndex) {
-        gameField[dstRowIndex][dstColIndex] *= 2;
+        if (gameField[dstRowIndex][dstColIndex] != Integer.MAX_VALUE / 2 + 1) {
+            gameField[dstRowIndex][dstColIndex] *= 2;
+        }
+        else {
+            score = Integer.MAX_VALUE;
+            gameField[srcRowIndex][srcColIndex] = 0;
+            return;
+        }
         gameField[srcRowIndex][srcColIndex] = 0;
-        score += gameField[dstRowIndex][dstColIndex];
+        if (score != null) {
+            long checkedScore = score + (long) gameField[dstRowIndex][dstColIndex];
+            if (checkedScore > Integer.MAX_VALUE) {
+                score = Integer.MAX_VALUE;
+            }
+            else {
+                score = (int) checkedScore;
+            }
+        }
     }
 
     private boolean moveValue(int srcRowIndex, int srcColIndex, int dstRowIndex, int dstColIndex) {
@@ -81,7 +107,7 @@ public class GameField implements FieldManager {
        return false;
     }
 
-    private boolean hasNoMoreMoves() {
+    public boolean hasNoMoreMoves() {
         for (int rows = 0; rows < gameField.length; ++rows) {
             for (int cols = 0; cols < gameField.length; ++cols) {
                 if (checkNeighbors(rows, cols)) {
@@ -93,17 +119,20 @@ public class GameField implements FieldManager {
         return true;
     }
 
-    public void move(Direction dir) {
+    public boolean move(Direction dir) {
         boolean had2048 = has2048;
         boolean fieldIsChanged;
 
         fieldIsChanged = proceedMove(dir);
 
         if (fieldIsChanged) {
-            spawnNewNumber(gameField);
+            fieldManager.spawnNewNumber(gameField);
         }
 
-        listener.update(had2048 != has2048, hasNoMoreMoves());
+        if (listener != null) {
+            listener.update(had2048 != has2048, hasNoMoreMoves());
+        }
+        return fieldIsChanged;
     }
 
     private boolean proceedMove(Direction dir) {
@@ -131,7 +160,12 @@ public class GameField implements FieldManager {
                                 currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
                                 currentNumSlot.isMerged = true;
                                 fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) has2048 = true;
+                                if (!has2048 && currentNumSlot.value == 2048) {
+                                    has2048 = true;
+                                    if (!reached2048) {
+                                        reached2048 = true;
+                                    }
+                                }
                             }
                             else {
                                 if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex + 1)) {
@@ -164,7 +198,12 @@ public class GameField implements FieldManager {
                                 currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
                                 currentNumSlot.isMerged = true;
                                 fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) has2048 = true;
+                                if (!has2048 && currentNumSlot.value == 2048) {
+                                    has2048 = true;
+                                    if (!reached2048) {
+                                        reached2048 = true;
+                                    }
+                                }
                             } else {
                                 if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex - 1)) {
                                     fieldIsChanged = true;
@@ -195,7 +234,12 @@ public class GameField implements FieldManager {
                                 currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
                                 currentNumSlot.isMerged = true;
                                 fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) has2048 = true;
+                                if (!has2048 && currentNumSlot.value == 2048) {
+                                    has2048 = true;
+                                    if (!reached2048) {
+                                        reached2048 = true;
+                                    }
+                                }
                             } else {
                                 if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex + 1, currentNumSlot.colIndex)) {
                                     fieldIsChanged = true;
@@ -226,7 +270,12 @@ public class GameField implements FieldManager {
                                 currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
                                 currentNumSlot.isMerged = true;
                                 fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) has2048 = true;
+                                if (!has2048 && currentNumSlot.value == 2048) {
+                                    has2048 = true;
+                                    if (!reached2048) {
+                                        reached2048 = true;
+                                    }
+                                }
                             } else {
                                 if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex - 1, currentNumSlot.colIndex)) {
                                     fieldIsChanged = true;
@@ -250,9 +299,16 @@ public class GameField implements FieldManager {
     }
 
     @Override
-    public void generateField(int[][] field) {
-        spawnNewNumber(field);
-        spawnNewNumber(field);
+    public void generateField(int[][] field, int[][] reference) {
+        if (reference != null) {
+            for (int i = 0; i < field.length; ++i) {
+                System.arraycopy(reference[i], 0, field[i], 0, field.length);
+            }
+        }
+        else {
+            fieldManager.spawnNewNumber(field);
+            fieldManager.spawnNewNumber(field);
+        }
     }
 
     @Override
@@ -285,8 +341,7 @@ public class GameField implements FieldManager {
                 field[i][j] = 0;
             }
         }
-        spawnNewNumber(field);
-        spawnNewNumber(field);
+        fieldManager.generateField(field, null);
     }
 
     public enum Direction {
