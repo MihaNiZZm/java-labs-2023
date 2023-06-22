@@ -69,6 +69,56 @@ public class GameField implements FieldManager {
         return true;
     }
 
+    private void rotateField90DegreesClockWise() {
+        int[][] reference = new int[this.gameField.length][this.gameField.length];
+        for (int i = 0; i < gameField.length; ++i) {
+            System.arraycopy(gameField[i], 0, reference[i], 0, gameField.length);
+        }
+
+        for (int i = 0; i < gameField.length; ++i) {
+            for (int j = 0; j < gameField.length; ++j) {
+                gameField[j][gameField.length - 1 - i] = reference[i][j];
+            }
+        }
+
+    }
+
+    private void doRotation(Direction dir) {
+        switch (dir) {
+            case UP -> {}
+            case LEFT -> {
+                rotateField90DegreesClockWise();
+            }
+            case DOWN -> {
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+            }
+            case RIGHT -> {
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+            }
+        }
+    }
+
+    private void undoRotation(Direction dir) {
+        switch (dir) {
+            case UP -> {}
+            case LEFT -> {
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+            }
+            case DOWN -> {
+                rotateField90DegreesClockWise();
+                rotateField90DegreesClockWise();
+            }
+            case RIGHT -> {
+                rotateField90DegreesClockWise();
+            }
+        }
+    }
+
     private boolean checkNeighbors(int x, int y) {
        int currentValue = gameField[x][y];
 
@@ -123,7 +173,9 @@ public class GameField implements FieldManager {
         boolean had2048 = has2048;
         boolean fieldIsChanged;
 
-        fieldIsChanged = proceedMove(dir);
+        doRotation(dir);
+        fieldIsChanged = pushTiles();
+        undoRotation(dir);
 
         if (fieldIsChanged) {
             fieldManager.spawnNewNumber(gameField);
@@ -135,161 +187,45 @@ public class GameField implements FieldManager {
         return fieldIsChanged;
     }
 
-    private boolean proceedMove(Direction dir) {
+    private boolean pushTiles() {
         boolean fieldIsChanged = false;
         Point firstNumSlot;
         Point currentNumSlot;
 
-        switch (dir) {
-            case LEFT -> {
-                for (int rowIndex = 0; rowIndex < gameField.length; ++rowIndex) {
-                    firstNumSlot = new Point();
-                    currentNumSlot = new Point();
+        for (int colIndex = 0; colIndex < gameField.length; ++colIndex) {
+            firstNumSlot = new Point();
+            currentNumSlot = new Point();
 
-                    for (int colIndex = 0; colIndex < gameField.length; ++colIndex) {
-                        if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
-                            firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
-                            if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, rowIndex, 0)) {
-                                fieldIsChanged = true;
+            for (int rowIndex = 0; rowIndex < gameField.length; ++rowIndex) {
+                if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
+                    firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
+                    if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, 0, colIndex)) {
+                        fieldIsChanged = true;
+                    }
+                    currentNumSlot.setValues(0, colIndex, firstNumSlot.value);
+                } else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
+                    if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
+                        merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
+                        currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
+                        currentNumSlot.isMerged = true;
+                        fieldIsChanged = true;
+                        if (!has2048 && currentNumSlot.value == 2048) {
+                            has2048 = true;
+                            if (!reached2048) {
+                                reached2048 = true;
                             }
-                            currentNumSlot.setValues(rowIndex, 0, firstNumSlot.value);
                         }
-                        else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
-                            if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
-                                merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
-                                currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
-                                currentNumSlot.isMerged = true;
-                                fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) {
-                                    has2048 = true;
-                                    if (!reached2048) {
-                                        reached2048 = true;
-                                    }
-                                }
-                            }
-                            else {
-                                if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex + 1)) {
-                                    fieldIsChanged = true;
-                                }
-                                currentNumSlot.setValues(currentNumSlot.rowIndex, currentNumSlot.colIndex + 1, gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex + 1]);
-                                currentNumSlot.isMerged = false;
-                            }
-
+                    } else {
+                        if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex + 1, currentNumSlot.colIndex)) {
+                            fieldIsChanged = true;
                         }
+                        currentNumSlot.setValues(currentNumSlot.rowIndex + 1, currentNumSlot.colIndex, gameField[currentNumSlot.rowIndex + 1][currentNumSlot.colIndex]);
+                        currentNumSlot.isMerged = false;
                     }
                 }
-                return fieldIsChanged;
-            }
-            case RIGHT -> {
-                for (int rowIndex = 0; rowIndex < gameField.length; ++rowIndex) {
-                    firstNumSlot = new Point();
-                    currentNumSlot = new Point();
-
-                    for (int colIndex = gameField.length - 1; colIndex >= 0; --colIndex) {
-                        if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
-                            firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
-                            if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, rowIndex, gameField.length - 1)) {
-                                fieldIsChanged = true;
-                            }
-                            currentNumSlot.setValues(rowIndex, gameField.length - 1, firstNumSlot.value);
-                        } else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
-                            if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
-                                merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
-                                currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
-                                currentNumSlot.isMerged = true;
-                                fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) {
-                                    has2048 = true;
-                                    if (!reached2048) {
-                                        reached2048 = true;
-                                    }
-                                }
-                            } else {
-                                if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex - 1)) {
-                                    fieldIsChanged = true;
-                                }
-                                currentNumSlot.setValues(currentNumSlot.rowIndex, currentNumSlot.colIndex - 1, gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex - 1]);
-                                currentNumSlot.isMerged = false;
-                            }
-                        }
-                    }
-                }
-                return fieldIsChanged;
-            }
-            case UP -> {
-                for (int colIndex = 0; colIndex < gameField.length; ++colIndex) {
-                    firstNumSlot = new Point();
-                    currentNumSlot = new Point();
-
-                    for (int rowIndex = 0; rowIndex < gameField.length; ++rowIndex) {
-                        if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
-                            firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
-                            if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, 0, colIndex)) {
-                                fieldIsChanged = true;
-                            }
-                            currentNumSlot.setValues(0, colIndex, firstNumSlot.value);
-                        } else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
-                            if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
-                                merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
-                                currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
-                                currentNumSlot.isMerged = true;
-                                fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) {
-                                    has2048 = true;
-                                    if (!reached2048) {
-                                        reached2048 = true;
-                                    }
-                                }
-                            } else {
-                                if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex + 1, currentNumSlot.colIndex)) {
-                                    fieldIsChanged = true;
-                                }
-                                currentNumSlot.setValues(currentNumSlot.rowIndex + 1, currentNumSlot.colIndex, gameField[currentNumSlot.rowIndex + 1][currentNumSlot.colIndex]);
-                                currentNumSlot.isMerged = false;
-                            }
-                        }
-                    }
-                }
-                return fieldIsChanged;
-            }
-            case DOWN -> {
-                for (int colIndex = 0; colIndex < gameField.length; ++colIndex) {
-                    firstNumSlot = new Point();
-                    currentNumSlot = new Point();
-
-                    for (int rowIndex = gameField.length - 1; rowIndex >= 0; --rowIndex) {
-                        if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
-                            firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
-                            if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, gameField.length - 1, colIndex)) {
-                                fieldIsChanged = true;
-                            }
-                            currentNumSlot.setValues(gameField.length - 1, colIndex, firstNumSlot.value);
-                        } else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
-                            if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
-                                merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
-                                currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
-                                currentNumSlot.isMerged = true;
-                                fieldIsChanged = true;
-                                if (!has2048 && currentNumSlot.value == 2048) {
-                                    has2048 = true;
-                                    if (!reached2048) {
-                                        reached2048 = true;
-                                    }
-                                }
-                            } else {
-                                if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex - 1, currentNumSlot.colIndex)) {
-                                    fieldIsChanged = true;
-                                }
-                                currentNumSlot.setValues(currentNumSlot.rowIndex - 1, currentNumSlot.colIndex, gameField[currentNumSlot.rowIndex - 1][currentNumSlot.colIndex]);
-                                currentNumSlot.isMerged = false;
-                            }
-                        }
-                    }
-                }
-                return fieldIsChanged;
             }
         }
-        return false;
+        return fieldIsChanged;
     }
 
     private boolean isEmptySlot(int rowIndex, int colIndex) { return gameField[rowIndex][colIndex] == 0; }
