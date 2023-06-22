@@ -24,8 +24,6 @@ public class ScoreManager {
         loadScores();
     }
 
-    record Score(String name, int score) {}
-
     private Score parseFileStringToScore(String string) {
         StringBuilder temp = new StringBuilder();
         int index = 0;
@@ -63,7 +61,7 @@ public class ScoreManager {
     private String buildDataToWrite() {
         StringBuilder data = new StringBuilder();
         for (Score score : scores) {
-            data.append(score.score).append(" ").append(score.name).append("\n");
+            data.append(score.score()).append(" ").append(score.name()).append("\n");
         }
         return data.toString();
     }
@@ -105,11 +103,15 @@ public class ScoreManager {
         }
 
         for (Score score : scores) {
-            if (score.score < scoreValue) {
+            if (score.score() < scoreValue) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public List<Score> getScores() {
+        return this.scores;
     }
 }

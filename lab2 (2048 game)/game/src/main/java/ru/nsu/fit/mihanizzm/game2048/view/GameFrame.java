@@ -4,22 +4,23 @@ import ru.nsu.fit.mihanizzm.game2048.presenter.Presenter;
 
 
 import javax.swing.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import javax.imageio.ImageIO;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
 
-public class GameFrame extends JFrame implements GameView, KeyListener {
+public class GameFrame extends JFrame implements GameView, KeyListener, ActionListener {
+    private final ScoreBoardFrame highScoresFrame;
+    private GameMenu menuBar;
     private final ViewPanel gamePanel;
     private Presenter gamePresenter;
 
     public GameFrame(int axisSize) {
+        addKeyListener(this);
         setDefaultFrameParameters();
         setMenuBar();
-        addKeyListener(this);
+
+        this.highScoresFrame = new ScoreBoardFrame();
 
         gamePanel = new ViewPanel(axisSize);
         add(gamePanel);
@@ -54,29 +55,8 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
 
 
     private void setMenuBar() {
-        JMenuBar newMenu = new JMenuBar();
-        JMenu gameMenu = new JMenu("Game");
-
-        JMenuItem restart = new JMenuItem("Restart");
-        JMenuItem undo = new JMenuItem("Undo");
-        JMenuItem exit = new JMenuItem("Exit");
-
-        gameMenu.add(restart);
-        gameMenu.add(undo);
-        gameMenu.add(exit);
-
-        JMenu settingsMenu = new JMenu("Settings");
-        JMenu highScoresMenu = new JMenu("Scores");
-        JMenu aboutMenu = new JMenu("About");
-        JMenu helpMenu = new JMenu("Help");
-
-        newMenu.add(gameMenu);
-        newMenu.add(settingsMenu);
-        newMenu.add(highScoresMenu);
-        newMenu.add(aboutMenu);
-        newMenu.add(helpMenu);
-
-        this.setJMenuBar(newMenu);
+        this.menuBar = new GameMenu(this);
+        this.setJMenuBar(this.menuBar);
     }
 
     @Override
@@ -95,13 +75,13 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
 
     @Override
     public void endNoMoves(String timeElapsed, int score, boolean needToAddScore) {
-        String[] responses = { "Restart [R]", "Cancel" };
+        String[] responses = { "Restart" };
         if (needToAddScore) {
             String name = JOptionPane.showInputDialog("Congratulations! You got a high score! Type your name here:");
             gamePresenter.registerNewScore(name, score);
         }
         String messageString = "You have no more moves! You have played for: " + timeElapsed + " and got " + score + " score points.";
-        if (JOptionPane.showOptionDialog(
+        int input = JOptionPane.showOptionDialog(
                 null,
                 messageString,
                 "GAME OVER!",
@@ -109,7 +89,8 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
                 responses,
-                0) == 0) {
+                0);
+        if (input == 0 || input == -1) {
             gamePresenter.restartGame();
         }
     }
@@ -151,5 +132,19 @@ public class GameFrame extends JFrame implements GameView, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         // not used
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == menuBar.restart) {
+            gamePresenter.restartGame();
+        }
+        else if (e.getSource() == menuBar.exit) {
+            System.exit(0);
+        }
+        else if (e.getSource() == menuBar.showScores) {
+            highScoresFrame.updateScores();
+            this.highScoresFrame.setVisible(true);
+        }
     }
 }

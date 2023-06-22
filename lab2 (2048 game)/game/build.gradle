@@ -17,3 +17,12 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+                'Main-Class': 'ru.nsu.fit.mihanizzm.game2048.GameMain'
+        )
+    }
+}
