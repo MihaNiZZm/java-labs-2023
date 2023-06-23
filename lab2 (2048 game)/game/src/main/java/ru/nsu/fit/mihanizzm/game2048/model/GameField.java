@@ -1,11 +1,7 @@
 package ru.nsu.fit.mihanizzm.game2048.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-public class GameField implements FieldManager {
-    private FieldManager fieldManager;
+public class GameField {
+    private final FieldManager fieldManager;
     private final int[][] gameField;
     private Integer score = 0;
     private FieldListener listener;
@@ -16,18 +12,18 @@ public class GameField implements FieldManager {
         return reached2048;
     }
 
-    public void setFieldManager(FieldManager fm) {
-        this.fieldManager = fm;
-    }
-
     public int[][] getGameField() {
         return gameField;
     }
 
-    public GameField(int axisSize) {
-        this.fieldManager = this;
+    public GameField(int axisSize, FieldManager fieldManager) {
+        this.fieldManager = fieldManager;
         this.gameField = new int[axisSize][axisSize];
         fieldManager.generateField(gameField, null);
+    }
+
+    public void generateField(int[][] reference) {
+        fieldManager.generateField(this.getGameField(), reference);
     }
 
     public void clear() {
@@ -86,9 +82,7 @@ public class GameField implements FieldManager {
     private void doRotation(Direction dir) {
         switch (dir) {
             case UP -> {}
-            case LEFT -> {
-                rotateField90DegreesClockWise();
-            }
+            case LEFT -> rotateField90DegreesClockWise();
             case DOWN -> {
                 rotateField90DegreesClockWise();
                 rotateField90DegreesClockWise();
@@ -113,9 +107,7 @@ public class GameField implements FieldManager {
                 rotateField90DegreesClockWise();
                 rotateField90DegreesClockWise();
             }
-            case RIGHT -> {
-                rotateField90DegreesClockWise();
-            }
+            case RIGHT -> rotateField90DegreesClockWise();
         }
     }
 
@@ -197,13 +189,13 @@ public class GameField implements FieldManager {
             currentNumSlot = new Point();
 
             for (int rowIndex = 0; rowIndex < gameField.length; ++rowIndex) {
-                if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
+                if (isNotEmptySlot(rowIndex, colIndex) && firstNumSlot.value == 0) {
                     firstNumSlot.setValues(rowIndex, colIndex, gameField[rowIndex][colIndex]);
                     if (moveValue(firstNumSlot.rowIndex, firstNumSlot.colIndex, 0, colIndex)) {
                         fieldIsChanged = true;
                     }
                     currentNumSlot.setValues(0, colIndex, firstNumSlot.value);
-                } else if (!isEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
+                } else if (isNotEmptySlot(rowIndex, colIndex) && firstNumSlot.value != 0) {
                     if (gameField[rowIndex][colIndex] == currentNumSlot.value && !currentNumSlot.isMerged) {
                         merge(rowIndex, colIndex, currentNumSlot.rowIndex, currentNumSlot.colIndex);
                         currentNumSlot.value = gameField[currentNumSlot.rowIndex][currentNumSlot.colIndex];
@@ -228,56 +220,10 @@ public class GameField implements FieldManager {
         return fieldIsChanged;
     }
 
-    private boolean isEmptySlot(int rowIndex, int colIndex) { return gameField[rowIndex][colIndex] == 0; }
+    private boolean isNotEmptySlot(int rowIndex, int colIndex) { return gameField[rowIndex][colIndex] != 0; }
 
     public int getScore() {
         return this.score;
-    }
-
-    @Override
-    public void generateField(int[][] field, int[][] reference) {
-        if (reference != null) {
-            for (int i = 0; i < field.length; ++i) {
-                System.arraycopy(reference[i], 0, field[i], 0, field.length);
-            }
-        }
-        else {
-            fieldManager.spawnNewNumber(field);
-            fieldManager.spawnNewNumber(field);
-        }
-    }
-
-    @Override
-    public void spawnNewNumber(int[][] field) {
-        Random pointChooser = new Random();
-        Random numberChooser = new Random();
-
-        List<Point> availablePoints = new ArrayList<>();
-        for (int rowIndex = 0; rowIndex < field.length; ++rowIndex) {
-            for (int colIndex = 0; colIndex < field.length; ++colIndex) {
-                if (isEmptySlot(rowIndex, colIndex)) {
-                    availablePoints.add(new Point(rowIndex, colIndex));
-                }
-            }
-        }
-
-        int index = pointChooser.nextInt(availablePoints.size());
-        Point chosenPoint = availablePoints.get(index);
-        if (numberChooser.nextDouble() < 0.9) {
-            field[chosenPoint.rowIndex][chosenPoint.colIndex] = 2;
-        } else {
-            field[chosenPoint.rowIndex][chosenPoint.colIndex] = 4;
-        }
-    }
-
-    @Override
-    public void clearField(int[][] field) {
-        for (int i = 0; i < field.length; ++i) {
-            for (int j = 0; j < field.length; ++j) {
-                field[i][j] = 0;
-            }
-        }
-        fieldManager.generateField(field, null);
     }
 
     public enum Direction {

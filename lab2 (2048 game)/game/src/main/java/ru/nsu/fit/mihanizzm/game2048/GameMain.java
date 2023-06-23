@@ -7,7 +7,7 @@ import ru.nsu.fit.mihanizzm.game2048.view.GameView;
 
 public class GameMain {
     public static void main(String[] args) {
-        GameField field = new GameField(4);
+        GameField field = new GameField(4, new GameFieldManager());
         GameView view = new GameFrame(4);
         GamePresenter presenter = new GamePresenter(field, view);
         presenter.run();
