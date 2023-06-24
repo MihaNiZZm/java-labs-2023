@@ -4,20 +4,14 @@ public class GameField {
 
     private final FieldManager fieldManager;
     private final int[][] gameField;
-    // CR: primitive?
-    private Integer score = 0;
+    private int score = 0;
     private FieldListener listener;
-    // CR: do we need both booleans?
     private boolean has2048 = false;
-    private boolean reached2048 = false;
-
-    public boolean alreadyWon() {
-        return reached2048;
-    }
 
     public int[][] getGameField() {
         return gameField;
     }
+    public boolean getHas2048() { return has2048; }
 
     public GameField(int axisSize, FieldManager fieldManager) {
         this.fieldManager = fieldManager;
@@ -48,14 +42,13 @@ public class GameField {
             return;
         }
         gameField[srcRowIndex][srcColIndex] = 0;
-        if (score != null) {
-            long checkedScore = score + (long) gameField[dstRowIndex][dstColIndex];
-            if (checkedScore > Integer.MAX_VALUE) {
-                score = Integer.MAX_VALUE;
-            }
-            else {
-                score = (int) checkedScore;
-            }
+
+        long checkedScore = score + (long) gameField[dstRowIndex][dstColIndex];
+        if (checkedScore > Integer.MAX_VALUE) {
+            score = Integer.MAX_VALUE;
+        }
+        else {
+            score = (int) checkedScore;
         }
     }
 
@@ -206,9 +199,6 @@ public class GameField {
                         fieldIsChanged = true;
                         if (!has2048 && currentNumSlot.value == 2048) {
                             has2048 = true;
-                            if (!reached2048) {
-                                reached2048 = true;
-                            }
                         }
                     } else {
                         if (moveValue(rowIndex, colIndex, currentNumSlot.rowIndex + 1, currentNumSlot.colIndex)) {

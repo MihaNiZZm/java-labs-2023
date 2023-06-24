@@ -1,6 +1,5 @@
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
-import ru.nsu.fit.mihanizzm.game2048.model.FieldManager;
 import ru.nsu.fit.mihanizzm.game2048.model.GameField;
 import ru.nsu.fit.mihanizzm.game2048.model.GameFieldManager;
 
@@ -199,11 +198,11 @@ public class ModelTests {
             referenceField[0][i] = 512;
         }
         testField.generateField(referenceField);
-        TestCase.assertFalse(testField.alreadyWon());
+        TestCase.assertFalse(testField.getHas2048());
         testField.move(GameField.Direction.RIGHT);
-        TestCase.assertFalse(testField.alreadyWon());
+        TestCase.assertFalse(testField.getHas2048());
         testField.move(GameField.Direction.RIGHT);
-        TestCase.assertTrue(testField.alreadyWon());
+        TestCase.assertTrue(testField.getHas2048());
     }
 
     @Test
