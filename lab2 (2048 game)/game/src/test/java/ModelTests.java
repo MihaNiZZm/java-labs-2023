@@ -191,18 +191,19 @@ public class ModelTests {
     public void hasReached2048() {
         int gameFieldSize = 4;
         GameField testField = new GameField(gameFieldSize, new TestFieldGenerator());
-
+        TestFieldListener listener = new TestFieldListener();
+        testField.setListener(listener);
 
         int[][] referenceField = new int[gameFieldSize][gameFieldSize];
         for (int i = 0; i < gameFieldSize; ++i) {
             referenceField[0][i] = 512;
         }
         testField.generateField(referenceField);
-        TestCase.assertFalse(testField.getHas2048());
+        TestCase.assertFalse(listener.got2048);
         testField.move(GameField.Direction.RIGHT);
-        TestCase.assertFalse(testField.getHas2048());
+        TestCase.assertFalse(listener.got2048);
         testField.move(GameField.Direction.RIGHT);
-        TestCase.assertTrue(testField.getHas2048());
+        TestCase.assertTrue(listener.got2048);
     }
 
     @Test

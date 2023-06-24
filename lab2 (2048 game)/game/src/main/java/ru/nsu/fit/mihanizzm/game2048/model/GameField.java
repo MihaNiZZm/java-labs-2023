@@ -11,7 +11,6 @@ public class GameField {
     public int[][] getGameField() {
         return gameField;
     }
-    public boolean getHas2048() { return has2048; }
 
     public GameField(int axisSize, FieldManager fieldManager) {
         this.fieldManager = fieldManager;
