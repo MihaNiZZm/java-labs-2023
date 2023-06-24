@@ -20,8 +20,10 @@ public class TestFieldGenerator implements FieldManager {
         }
     }
 
+
     @Override
     public void spawnNewNumber(int[][] field) {
+        // CR: we should throw exception if we expect that this method should never be called
 //        Random pointChooser = new Random();
 //        Random numberChooser = new Random();
 //

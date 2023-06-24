@@ -1,6 +1,6 @@
 package ru.nsu.fit.mihanizzm.game2048.model;
 
-public class Point {
+class Point {
     public int rowIndex;
     public int colIndex;
     public int value;

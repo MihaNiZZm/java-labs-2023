@@ -24,6 +24,7 @@ public class ScoreManager {
         loadScores();
     }
 
+
     private Score parseFileStringToScore(String string) {
         StringBuilder temp = new StringBuilder();
         int index = 0;
@@ -45,13 +46,13 @@ public class ScoreManager {
     }
 
     private void loadScores() {
+        // CR: rewrite with Files.lines() and stream, now it's very complicated
         try (InputStream inputStream = ScoreManager.class.getResourceAsStream(HIGH_SCORES_FILE_PATH)) {
             assert inputStream != null;
-            try (Scanner scanner = new Scanner(inputStream)) {
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    this.scores.add(parseFileStringToScore(line));
-                }
+            Scanner scanner = new Scanner(inputStream);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                this.scores.add(parseFileStringToScore(line));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,6 +68,7 @@ public class ScoreManager {
     }
 
     public void updateScoresFile() {
+        // CR: rewrite with nio and stream
         String filePath = null;
         try {
             filePath = Objects.requireNonNull(getClass().getResource(HIGH_SCORES_FILE_PATH)).toURI().getPath();

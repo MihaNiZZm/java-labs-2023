@@ -1,10 +1,13 @@
 package ru.nsu.fit.mihanizzm.game2048.model;
 
 public class GameField {
+
     private final FieldManager fieldManager;
     private final int[][] gameField;
+    // CR: primitive?
     private Integer score = 0;
     private FieldListener listener;
+    // CR: do we need both booleans?
     private boolean has2048 = false;
     private boolean reached2048 = false;
 
